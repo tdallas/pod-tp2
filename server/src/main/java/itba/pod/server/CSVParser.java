@@ -21,25 +21,22 @@ public class CSVParser {
     public static final String TREES = "arboles";
     public static final String NEIGHBOURHOODS = "barrios";
 
-    public static final String DELIMITER = ",";
+    public static final String DELIMITER = ";";
 
     public List<CSVEntry> readCSV(final String dataName, final String city, final Map<String, String> fieldsMap)
             throws IOException {
 //        final String filePath = "/afs/it.itba.edu.ar/pub/pod/" + dataName + city + ".csv";
+        // TODO: Change this path
         final String filePath = "/home/lucas/Documents/pod-tp2/server/src/test/java/itba/" + dataName + city + ".csv";
         BufferedReader br = Files.newBufferedReader(Paths.get(filePath));
-        String line = br.readLine();
-        Map<String, Integer> indexes = getIndexesFromFields(line.split(DELIMITER), fieldsMap);
-        List<CSVEntry> csvEntryList = new LinkedList<>();
+        final String[] header = br.readLine().split(DELIMITER);
+        Map<String, Integer> indexes = getIndexesFromFields(header, fieldsMap);
+        List<CSVEntry> csvEntryList;
 
         if (dataName.equals(TREES)) {
-            while ((line = br.readLine()) != null) {
-                csvEntryList.add(buildTreeFromRow(line.split(DELIMITER), indexes));
-            }
+            csvEntryList = getTreesFromCSV(br, indexes, header.length);
         } else if (dataName.equals(NEIGHBOURHOODS)) {
-            while ((line = br.readLine()) != null) {
-                csvEntryList.add(buildNeighbourhoodFromRow(line.split(DELIMITER), indexes));
-            }
+            csvEntryList = getNeighbourhoodsFromCSV(br, indexes, header.length);
         } else {
             throw new IllegalArgumentException("The solicited data cannot be processed or queried due to a lack of " +
                     "implementation");
@@ -48,18 +45,38 @@ public class CSVParser {
         return csvEntryList;
     }
 
-    private Tree buildTreeFromRow(final String[] row, Map<String, Integer> indexes) {
-        return new Tree(
-                row[indexes.get(NEIGHBOURHOOD)],
-                row[indexes.get(STREET)],
-                row[indexes.get(SCIENTIFIC_NAME)],
-                Double.parseDouble(row[indexes.get(DIAMETER)]));
+    private List<CSVEntry> getTreesFromCSV(BufferedReader br, final Map<String, Integer> indexes,
+                                           final Integer columns) throws IOException {
+        List<CSVEntry> csvEntryList = new LinkedList<>();
+        String line;
+
+        while ((line = br.readLine()) != null) {
+            if (line.length() < columns)
+                continue;
+
+            Optional<Tree> tree = buildTreeFromRow(line.split(DELIMITER), indexes);
+
+            tree.ifPresent(csvEntryList::add);
+        }
+
+        return csvEntryList;
     }
 
-    private Neighbourhood buildNeighbourhoodFromRow(final String[] row, Map<String, Integer> indexes) {
-        return new Neighbourhood(
-                row[indexes.get(NAME)],
-                Integer.parseInt(row[indexes.get(POPULATION)]));
+    private List<CSVEntry> getNeighbourhoodsFromCSV(BufferedReader br, final Map<String, Integer> indexes,
+                                                    final Integer columns) throws IOException {
+        List<CSVEntry> csvEntryList = new LinkedList<>();
+        String line;
+
+        while ((line = br.readLine()) != null) {
+            if (line.length() < columns)
+                continue;
+
+            Optional<Neighbourhood> neighbourhood = buildNeighbourhoodFromRow(line.split(DELIMITER), indexes);
+
+            neighbourhood.ifPresent(csvEntryList::add);
+        }
+
+        return csvEntryList;
     }
 
     private Map<String, Integer> getIndexesFromFields(final String[] allFieldsArray,
@@ -71,5 +88,27 @@ public class CSVParser {
             fieldIndexMap.put(e.getKey(), allFields.indexOf(e.getValue()));
 
         return fieldIndexMap;
+    }
+
+    private Optional<Tree> buildTreeFromRow(final String[] row, Map<String, Integer> indexes) {
+        String neighbourhood = row[indexes.get(NEIGHBOURHOOD)];
+        String street = row[indexes.get(STREET)];
+        String scientificName = row[indexes.get(SCIENTIFIC_NAME)];
+        String diameterString = row[indexes.get(DIAMETER)];
+
+        if (neighbourhood.isEmpty() || street.isEmpty() || scientificName.isEmpty() || diameterString.isEmpty())
+            return Optional.empty();
+
+        return Optional.of(new Tree(neighbourhood, street, scientificName, Double.parseDouble(diameterString)));
+    }
+
+    private Optional<Neighbourhood> buildNeighbourhoodFromRow(final String[] row, Map<String, Integer> indexes) {
+        String name = row[indexes.get(NAME)];
+        String populationString = row[indexes.get(POPULATION)];
+
+        if (name.isEmpty() || populationString.isEmpty())
+            return Optional.empty();
+
+        return Optional.of(new Neighbourhood(name, Integer.parseInt(populationString)));
     }
 }

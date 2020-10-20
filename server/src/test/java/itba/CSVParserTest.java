@@ -27,6 +27,8 @@ public class CSVParserTest {
             for (CSVEntry csvEntry : csvEntryList)
                 System.out.println(csvEntry.toString());
 
-        } catch (IOException ignored) {}
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
