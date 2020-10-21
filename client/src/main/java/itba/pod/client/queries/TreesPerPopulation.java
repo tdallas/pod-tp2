@@ -25,12 +25,12 @@ public class TreesPerPopulation {
     
     public static void main(String[] args) {
         List<String> addresses = Arrays.asList(System.getProperty("addresses").split(";"));
-        String neighbour = System.getProperty("city");
+        String city = System.getProperty("city");
         String inPath = System.getProperty("inPath");
         String outPath = System.getProperty("outPath");
 
-        Map<String, Neighbourhood> neighbourhoods = CSVParser.readNeighbourhoods(inPath);
-        List<Tree> trees = CSVParser.readTrees(inPath);
+        Map<String, Neighbourhood> neighbourhoods = CSVParser.readNeighbourhoods(inPath, city);
+        List<Tree> trees = CSVParser.readTrees(inPath, city);
 
         HazelCast hz = new HazelCast(addresses);
 
@@ -61,7 +61,7 @@ public class TreesPerPopulation {
                                                                           .thenComparing(Map.Entry::getKey));
 
 
-        //TODO escribir sorted en el archivo
+        //TODO escribir sorted en outPath
 
     }
 
