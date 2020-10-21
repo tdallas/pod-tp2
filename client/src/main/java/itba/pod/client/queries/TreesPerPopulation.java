@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TreesPerPopulation {
@@ -36,10 +37,16 @@ public class TreesPerPopulation {
 
         IList<String> neighbourhoodsWithTrees = hz.getList("allTrees");
 
-        // TODO usar algun stream copado
-        trees.forEach(t -> {
-            if (neighbourhoods.containsKey(t.getNeighbourhood())) neighbourhoodsWithTrees.add(t.getNeighbourhood());
-        });
+        // TODO mimi que opinas de este stream? me genera duda que pisa el hz.getList()
+        neighbourhoodsWithTrees = (IList<String>) trees.stream()
+                .map(Tree::getNeighbourhood)
+                .filter(t -> neighbourhoods.containsKey(t))
+                .collect(Collectors.toList());
+
+        // Version con for each:
+        //  trees.forEach(t -> {
+        //      if (neighbourhoods.containsKey(t.getNeighbourhood())) neighbourhoodsWithTrees.add(t.getNeighbourhood());
+        //  });
 
         //TODO tomar tiempo y logearlo en un archivo
         List<Map.Entry<String, Long>> result = null;
@@ -59,7 +66,6 @@ public class TreesPerPopulation {
         Stream<Map.Entry<String, Double>> sorted = result_percentage.entrySet().stream()
                                                         .sorted(Comparator.comparingDouble(Map.Entry<String, Double>::getValue).reversed()
                                                                           .thenComparing(Map.Entry::getKey));
-
 
         //TODO escribir sorted en outPath
 
