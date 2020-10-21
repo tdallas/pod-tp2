@@ -7,15 +7,6 @@ import java.nio.file.Paths;
 import java.util.*;
 
 public class CSVParser {
-    // Tree fields (standard name)
-    public static final String NEIGHBOURHOOD = "NEIGHBOURHOOD";
-    public static final String STREET = "STREET";
-    public static final String SCIENTIFIC_NAME = "SCIENTIFIC_NAME";
-    public static final String DIAMETER = "DIAMETER";
-
-    // Neighbourhood fields (standard name)
-    public static final String NAME = "NAME";
-    public static final String POPULATION = "POPULATION";
 
     // Possible data types to process and query
     public static final String TREES = "arboles";
@@ -23,60 +14,93 @@ public class CSVParser {
 
     public static final String DELIMITER = ";";
 
-    public List<CSVEntry> readCSV(final String dataName, final String city, final Map<String, String> fieldsMap)
+    /**
+     * Reads data from a CSV file and returns it as a list of entries. It will ignore rows that do not have all the
+     * expected fields to process the data or that have empty fields for said data.
+     * @param city is the abbreviated name of a city, e.g., "BUE" for Buenos Aires or "NYC" for New York.
+     * @param path is the path of the folder containing the input CSV file
+     * @param fieldsMap is the map <standardName, customName> indicating what custom field names correspond to which
+     *                  standard names for the data values.
+     * @return a list of entries. Every entry in the list will be of the same type.
+     * @throws IOException when the buffered reader fails to read a line.
+     */
+    public List<CSVEntry> readTreesCSV(final String city, final String path, final Map<String, String> fieldsMap)
             throws IOException {
-//        final String filePath = "/afs/it.itba.edu.ar/pub/pod/" + dataName + city + ".csv";
-        // TODO: Change this path
-        final String filePath = "/home/lucas/Documents/pod-tp2/server/src/test/java/itba/" + dataName + city + ".csv";
+        final String filePath = path + TREES + city + ".csv";
+
+        return readCSV(TREES, filePath, fieldsMap);
+    }
+
+    /**
+     * Reads data from a CSV file and returns it as a list of entries. It will ignore rows that do not have all the
+     * expected fields to process the data or that have empty fields for said data.
+     * @param city is the abbreviated name of a city, e.g., "BUE" for Buenos Aires or "NYC" for New York.
+     * @param path is the path of the folder containing the input CSV file
+     * @param fieldsMap is the map <standardName, customName> indicating what custom field names correspond to which
+     *                  standard names for the data values.
+     * @return a list of entries. Every entry in the list will be of the same type.
+     * @throws IOException when the buffered reader fails to read a line.
+     */
+    public List<CSVEntry> readNeighbourhoodsCSV(final String city, final String path, final Map<String, String> fieldsMap)
+            throws IOException {
+        final String filePath = path + NEIGHBOURHOODS + city + ".csv";
+
+        return readCSV(NEIGHBOURHOODS, filePath, fieldsMap);
+    }
+
+    /**
+     * Reads data from a CSV file and returns it as a list of entries. It will ignore rows that do not have all the
+     * expected fields to process the data or that have empty fields for said data.
+     * @param dataName is the plural name of the data in Spanish, e.g., "arboles" for data about trees. Check the static
+     *                 fields of the parser in order to know what type of data you can query.
+     * @param filePath is the input CSV's full file path.
+     * @param fieldsMap is the map <standardName, customName> indicating what custom field names correspond to which
+     *                  standard names for the data values.
+     * @return a list of entries. Every entry in the list will be of the same type.
+     * @throws IOException when the buffered reader fails to read a line
+     * @throws IllegalArgumentException when the input dataName doesn't match any of the data names expected to be
+     *                                  queried.
+     */
+    private List<CSVEntry> readCSV(final String dataName, final String filePath, final Map<String, String> fieldsMap)
+            throws IOException, IllegalArgumentException {
         BufferedReader br = Files.newBufferedReader(Paths.get(filePath));
         final String[] header = br.readLine().split(DELIMITER);
         Map<String, Integer> indexes = getIndexesFromFields(header, fieldsMap);
-        List<CSVEntry> csvEntryList;
 
+        return getDataFromCSV(br, indexes, header.length, dataName);
+    }
+
+    private List<CSVEntry> getDataFromCSV(BufferedReader br, final Map<String, Integer> indexes,
+                                           final Integer columns, final String dataName)
+                                            throws IOException, IllegalArgumentException {
+        List<CSVEntry> csvEntryList = new LinkedList<>();
+        String line;
+
+        while ((line = br.readLine()) != null) {
+            final String[] row = line.split(DELIMITER);
+
+            if (row.length < columns)
+                continue;
+
+            // TODO: Refactor this so that the if-else comparison inside the function isn't checked in every iteration
+            Optional<CSVEntry> entry = buildEntry(row, indexes, dataName);
+
+            entry.ifPresent(csvEntryList::add);
+        }
+
+        return csvEntryList;
+    }
+
+    private Optional<CSVEntry> buildEntry(final String[] row, Map<String, Integer> indexes, final String dataName)
+            throws IllegalArgumentException {
         if (dataName.equals(TREES)) {
-            csvEntryList = getTreesFromCSV(br, indexes, header.length);
+            return buildTreeFromRow(row, indexes);
         } else if (dataName.equals(NEIGHBOURHOODS)) {
-            csvEntryList = getNeighbourhoodsFromCSV(br, indexes, header.length);
+            return buildNeighbourhoodFromRow(row, indexes);
         } else {
             throw new IllegalArgumentException("The solicited data cannot be processed or queried due to a lack of " +
                     "implementation");
         }
-
-        return csvEntryList;
-    }
-
-    private List<CSVEntry> getTreesFromCSV(BufferedReader br, final Map<String, Integer> indexes,
-                                           final Integer columns) throws IOException {
-        List<CSVEntry> csvEntryList = new LinkedList<>();
-        String line;
-
-        while ((line = br.readLine()) != null) {
-            if (line.length() < columns)
-                continue;
-
-            Optional<Tree> tree = buildTreeFromRow(line.split(DELIMITER), indexes);
-
-            tree.ifPresent(csvEntryList::add);
-        }
-
-        return csvEntryList;
-    }
-
-    private List<CSVEntry> getNeighbourhoodsFromCSV(BufferedReader br, final Map<String, Integer> indexes,
-                                                    final Integer columns) throws IOException {
-        List<CSVEntry> csvEntryList = new LinkedList<>();
-        String line;
-
-        while ((line = br.readLine()) != null) {
-            if (line.length() < columns)
-                continue;
-
-            Optional<Neighbourhood> neighbourhood = buildNeighbourhoodFromRow(line.split(DELIMITER), indexes);
-
-            neighbourhood.ifPresent(csvEntryList::add);
-        }
-
-        return csvEntryList;
     }
 
     private Map<String, Integer> getIndexesFromFields(final String[] allFieldsArray,
@@ -90,11 +114,11 @@ public class CSVParser {
         return fieldIndexMap;
     }
 
-    private Optional<Tree> buildTreeFromRow(final String[] row, Map<String, Integer> indexes) {
-        String neighbourhood = row[indexes.get(NEIGHBOURHOOD)];
-        String street = row[indexes.get(STREET)];
-        String scientificName = row[indexes.get(SCIENTIFIC_NAME)];
-        String diameterString = row[indexes.get(DIAMETER)];
+    private Optional<CSVEntry> buildTreeFromRow(final String[] row, Map<String, Integer> indexes) {
+        String neighbourhood = row[indexes.get(Tree.NEIGHBOURHOOD)];
+        String street = row[indexes.get(Tree.STREET)];
+        String scientificName = row[indexes.get(Tree.SCIENTIFIC_NAME)];
+        String diameterString = row[indexes.get(Tree.DIAMETER)];
 
         if (neighbourhood.isEmpty() || street.isEmpty() || scientificName.isEmpty() || diameterString.isEmpty())
             return Optional.empty();
@@ -102,9 +126,9 @@ public class CSVParser {
         return Optional.of(new Tree(neighbourhood, street, scientificName, Double.parseDouble(diameterString)));
     }
 
-    private Optional<Neighbourhood> buildNeighbourhoodFromRow(final String[] row, Map<String, Integer> indexes) {
-        String name = row[indexes.get(NAME)];
-        String populationString = row[indexes.get(POPULATION)];
+    private Optional<CSVEntry> buildNeighbourhoodFromRow(final String[] row, Map<String, Integer> indexes) {
+        String name = row[indexes.get(Neighbourhood.NAME)];
+        String populationString = row[indexes.get(Neighbourhood.POPULATION)];
 
         if (name.isEmpty() || populationString.isEmpty())
             return Optional.empty();
