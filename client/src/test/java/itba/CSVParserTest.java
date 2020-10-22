@@ -1,9 +1,10 @@
 package itba;
 
-import itba.pod.server.CSVEntry;
-import itba.pod.server.CSVParser;
-import itba.pod.server.Neighbourhood;
-import itba.pod.server.Tree;
+import itba.pod.api.model.CSVEntry;
+import itba.pod.api.model.Neighbourhood;
+import itba.pod.api.model.Tree;
+import itba.pod.client.utils.CSVParser;
+
 import org.junit.Test;
 
 import java.io.IOException;
