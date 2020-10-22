@@ -10,6 +10,8 @@ import itba.pod.api.mappers.CounterMapper;
 import itba.pod.api.model.Neighbourhood;
 import itba.pod.api.model.Tree;
 import itba.pod.api.reducers.CounterReducerFactory;
+import itba.pod.client.exceptions.InvalidArgumentException;
+import itba.pod.client.utils.ArgumentValidator;
 import itba.pod.client.utils.CSVParser;
 import itba.pod.client.utils.HazelCast;
 import org.slf4j.Logger;
@@ -24,23 +26,25 @@ public class TreesPerPopulation {
 
     private static Logger logger = LoggerFactory.getLogger(TreesPerPopulation.class);
     
-    public static void main(String[] args) {
-        List<String> addresses = Arrays.asList(System.getProperty("addresses").split(";"));
+    public static void main(String[] args) throws InvalidArgumentException {
+        String addresses = System.getProperty("addresses");
         String city = System.getProperty("city");
         String inPath = System.getProperty("inPath");
         String outPath = System.getProperty("outPath");
 
+        ArgumentValidator.validate(addresses, city, inPath, outPath);
+        List<String> addressesList = Arrays.asList(addresses.split(";"));
+
         Map<String, Neighbourhood> neighbourhoods = CSVParser.readNeighbourhoods(inPath, city);
         List<Tree> trees = CSVParser.readTrees(inPath, city);
 
-        HazelCast hz = new HazelCast(addresses);
+        HazelCast hz = new HazelCast(addressesList);
 
-        IList<String> neighbourhoodsWithTrees = hz.getList("allTrees");
-
+        IList<String> neighbourhoodsWithTrees = hz.getList("g9dataSource");
         // TODO mimi que opinas de este stream? me genera duda que pisa el hz.getList()
         neighbourhoodsWithTrees = (IList<String>) trees.stream()
                 .map(Tree::getNeighbourhood)
-                .filter(t -> neighbourhoods.containsKey(t))
+                .filter(neighbourhoods::containsKey)
                 .collect(Collectors.toList());
 
         // Version con for each:

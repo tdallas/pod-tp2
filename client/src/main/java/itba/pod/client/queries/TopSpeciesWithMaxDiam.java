@@ -12,6 +12,8 @@ import itba.pod.api.model.Tree;
 import itba.pod.api.reducers.AvgReducerFactory;
 import itba.pod.api.utils.Pair;
 import itba.pod.api.utils.PairNeighbourhoodStreet;
+import itba.pod.client.exceptions.InvalidArgumentException;
+import itba.pod.client.utils.ArgumentValidator;
 import itba.pod.client.utils.CSVParser;
 import itba.pod.client.utils.HazelCast;
 import org.slf4j.Logger;
@@ -25,36 +27,43 @@ import java.util.concurrent.ExecutionException;
 public class TopSpeciesWithMaxDiam {
     private static Logger logger = LoggerFactory.getLogger(TreesPerPopulation.class);
 
-    public static void main(String[] args) {
-        List<String> addresses = Arrays.asList(System.getProperty("addresses").split(";"));
+    public static void main(String[] args) throws InvalidArgumentException {
+        String addresses = System.getProperty("addresses");
         String city = System.getProperty("city");
         String inPath = System.getProperty("inPath");
         String outPath = System.getProperty("outPath");
-        Integer n = Integer.valueOf(System.getProperty("n"));
+        String nString = System.getProperty("n");
+
+        ArgumentValidator.validate(addresses, city, inPath, outPath, nString);
+        List<String> addressesList = Arrays.asList(addresses.split(";"));
+        Integer n = Integer.valueOf(nString);
 
         List<Tree> trees = CSVParser.readTrees(inPath, city);
 
-        HazelCast hz = new HazelCast(addresses);
-        IList<Pair<String, Double>> queryTrees = hz.getList("allTrees");
+        HazelCast hz = new HazelCast(addressesList);
+
+        IList<Pair<String, Double>> speciesAndDiameter = hz.getList("g9dataSource");
         assert trees != null;
         trees.forEach(t -> {
-            queryTrees.add(new Pair<String, Double>(t.getScientificName(), t.getDiameter()));
+            speciesAndDiameter.add(new Pair<>(t.getScientificName(), t.getDiameter()));
         });
 
         //TODO tomar tiempo y logearlo en un archivo
         List<Map.Entry<String, Double>> result = null;
         try {
-            result = TopSpeciesWithMaxDiam.query(hz, queryTrees, n);
+            result = TopSpeciesWithMaxDiam.query(hz, speciesAndDiameter, n);
         } catch (Exception e) {
             // TODO manejar excepcion
         }
 
-        //TODO escribir resutl
+        //TODO escribir result in outPath
+
     }
 
-    private static List<Map.Entry<String, Double>> query(HazelCast hz, IList<Pair<String, Double>> queryTrees, Integer n) throws ExecutionException, InterruptedException {
-        JobTracker jobTracker = hz.getJobTracker("TopNSprecies");
-        final KeyValueSource<String, Pair<String,Double>> source = KeyValueSource.fromList(queryTrees);
+    private static List<Map.Entry<String, Double>> query(HazelCast hz, IList<Pair<String, Double>> speciesAndDiameter, Integer n) throws ExecutionException, InterruptedException {
+
+        JobTracker jobTracker = hz.getJobTracker("g9topNSpecies");
+        final KeyValueSource<String, Pair<String,Double>> source = KeyValueSource.fromList(speciesAndDiameter);
         Job<String, Pair<String,Double>> job = jobTracker.newJob(source);
 
         //based on https://gist.github.com/noctarius/7784770

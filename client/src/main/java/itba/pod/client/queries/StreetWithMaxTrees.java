@@ -11,6 +11,8 @@ import itba.pod.api.mappers.CounterMapper;
 import itba.pod.api.model.Tree;
 import itba.pod.api.reducers.CounterReducerFactory;
 import itba.pod.api.utils.PairNeighbourhoodStreet;
+import itba.pod.client.exceptions.InvalidArgumentException;
+import itba.pod.client.utils.ArgumentValidator;
 import itba.pod.client.utils.CSVParser;
 import itba.pod.client.utils.HazelCast;
 import org.slf4j.Logger;
@@ -23,61 +25,64 @@ import java.util.stream.Collectors;
 public class StreetWithMaxTrees {
     private static Logger logger = LoggerFactory.getLogger(TreesPerPopulation.class);
 
-    public static void main(String[] args) {
-        List<String> addresses = Arrays.asList(System.getProperty("addresses").split(";"));
+    public static void main(String[] args) throws InvalidArgumentException {
+        String addresses = System.getProperty("addresses");
         String city = System.getProperty("city");
         String inPath = System.getProperty("inPath");
         String outPath = System.getProperty("outPath");
-        Integer min = Integer.valueOf(System.getProperty("min"));
+        String minString = System.getProperty("min");
+
+        ArgumentValidator.validate(addresses, city, inPath, outPath, minString);
+        List<String> addressesList = Arrays.asList(addresses.split(";"));
+        Integer min = Integer.valueOf(minString);
 
         List<Tree> trees = CSVParser.readTrees(inPath, city);
 
+        HazelCast hz = new HazelCast(addressesList);
 
-        HazelCast hz = new HazelCast(addresses);
-        IList<PairNeighbourhoodStreet> queryTrees = hz.getList("allTrees");
+        IList<PairNeighbourhoodStreet> streetAndNeighbourhood = hz.getList("g9dataSource");
         assert trees != null;
         trees.forEach(t -> {
-            queryTrees.add(new PairNeighbourhoodStreet(t.getStreet(), t.getNeighbourhood()));
+            streetAndNeighbourhood.add(new PairNeighbourhoodStreet(t.getStreet(), t.getNeighbourhood()));
         });
-
 
         //TODO tomar tiempo y logearlo en un archivo
         List<Map.Entry<PairNeighbourhoodStreet, Long>> result = null;
         try {
-            result = StreetWithMaxTrees.query(hz, queryTrees, min);
+            result = StreetWithMaxTrees.query(hz, streetAndNeighbourhood, min);
         } catch (Exception e) {
             // TODO manejar excepcion
         }
 
-        Map<PairNeighbourhoodStreet, Long> filterresult = new HashMap<>();
-        PairNeighbourhoodStreet neighbourhoodprev = null;
+        Map<PairNeighbourhoodStreet, Long> filtered_result = new HashMap<>();
+        PairNeighbourhoodStreet pairPrev = null;
+        PairNeighbourhoodStreet pairMax = null;
         Long count = Long.MIN_VALUE;
         assert result != null;
-        for (Map.Entry<PairNeighbourhoodStreet, Long> me : result) {
-            PairNeighbourhoodStreet neighbourhoodcurr = me.getKey();
+        for (Map.Entry<PairNeighbourhoodStreet, Long> entry : result) {
+            PairNeighbourhoodStreet pairCurr = entry.getKey();
 
-            if (neighbourhoodprev != null && !neighbourhoodprev.getNeighbourhood().equals(neighbourhoodcurr.getNeighbourhood())) {
-                filterresult.put(neighbourhoodprev, count);
+            if (pairPrev != null && !pairPrev.getNeighbourhood().equals(pairCurr.getNeighbourhood())) {
+                filtered_result.put(pairMax, count);
+                pairMax = null;
                 count = Long.MIN_VALUE;
             } else {
-                if (me.getValue() > count) {
-                    count = me.getValue();
+                if (entry.getValue() > count) {
+                    pairMax = pairCurr.clone();
+                    count = entry.getValue();
                 }
-
             }
-            //TODO chequear si no hace referencia
-            neighbourhoodprev = neighbourhoodcurr.clone();
-
+            pairPrev = pairCurr.clone();
         }
 
-        //TODO escribir filterresult en outPath
-
+        //TODO escribir filtered_result en outPath
 
     }
 
-    private static List<Map.Entry<PairNeighbourhoodStreet, Long>> query(HazelCast hz, IList<PairNeighbourhoodStreet> queryTrees, Integer min) throws ExecutionException, InterruptedException {
-        JobTracker jobTracker = hz.getJobTracker("StreetMaxTrees");
-        final KeyValueSource<String, PairNeighbourhoodStreet> source = KeyValueSource.fromList(queryTrees);
+    private static List<Map.Entry<PairNeighbourhoodStreet, Long>> query(HazelCast hz, IList<PairNeighbourhoodStreet> streetAndNeighbourhood, Integer min) throws ExecutionException, InterruptedException {
+
+        JobTracker jobTracker = hz.getJobTracker("g9streetMaxTrees");
+        final KeyValueSource<String, PairNeighbourhoodStreet> source = KeyValueSource.fromList(streetAndNeighbourhood);
         Job<String, PairNeighbourhoodStreet> job = jobTracker.newJob(source);
 
         ICompletableFuture<List<Map.Entry<PairNeighbourhoodStreet, Long>>> future = job
