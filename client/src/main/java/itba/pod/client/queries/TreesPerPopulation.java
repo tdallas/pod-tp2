@@ -53,38 +53,38 @@ public class TreesPerPopulation {
         //  });
 
         //TODO tomar tiempo y logearlo en un archivo
-        List<Map.Entry<String, Long>> result = null;
+        Map<String, Long> result = null;
         try {
             result = TreesPerPopulation.query(hz, neighbourhoodsWithTrees);
         } catch (Exception e) {
             // TODO manejar excepcion
         }
 
-        Map<String, Double> result_percentage = new LinkedHashMap<>();
-
-        for (Map.Entry<String, Long> entry : result) {
+        Map<String, Double> calculated_result = new LinkedHashMap<>();
+        assert result != null;
+        for (Map.Entry<String, Long> entry : result.entrySet()) {
             Double population = neighbourhoods.get(entry.getKey()).getPopulation().doubleValue();
-            result_percentage.put(entry.getKey(), entry.getValue()/population);
+            calculated_result.put(entry.getKey(), entry.getValue()/population);
         }
 
-        Stream<Map.Entry<String, Double>> sorted = result_percentage.entrySet().stream()
+        Stream<Map.Entry<String, Double>> sorted_result = calculated_result.entrySet().stream()
                                                         .sorted(Comparator.comparingDouble(Map.Entry<String, Double>::getValue).reversed()
                                                                           .thenComparing(Map.Entry::getKey));
 
-        //TODO escribir sorted en outPath
+        //TODO escribir sorted_result en outPath
 
     }
 
-    private static List<Map.Entry<String, Long>> query(HazelCast hz, IList<String> neighbourhoodsWithTrees) throws ExecutionException, InterruptedException {
+    private static Map<String, Long> query(HazelCast hz, IList<String> neighbourhoodsWithTrees) throws ExecutionException, InterruptedException {
 
-        JobTracker jobTracker = hz.getJobTracker("treesPerPop");
+        JobTracker jobTracker = hz.getJobTracker("g9treesPerPop");
         final KeyValueSource<String,String> source = KeyValueSource.fromList(neighbourhoodsWithTrees);
         Job<String,String> job = jobTracker.newJob(source);
 
-        ICompletableFuture<List<Map.Entry<String, Long>>> future = job
+        ICompletableFuture<Map<String, Long>> future = job
                 .mapper(new CounterMapper<>())
-                .combiner(new CounterCombinerFactory())
-                .reducer(new CounterReducerFactory())
+                .combiner(new CounterCombinerFactory<>())
+                .reducer(new CounterReducerFactory<>())
                 .submit();
 
         return future.get();
