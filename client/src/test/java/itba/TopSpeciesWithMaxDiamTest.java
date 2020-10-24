@@ -17,7 +17,7 @@ public class TopSpeciesWithMaxDiamTest {
     @Test
     public void testQuery() throws ExecutionException, InterruptedException {
         List<String> addresses = new LinkedList<>();
-        addresses.add("localhost");
+        addresses.add("127.0.0.1");
         HazelCast hz = new HazelCast(addresses);
         IList<Tree> trees = hz.getList("g9topNSpecies");
         var t1 = new Tree();
@@ -33,7 +33,7 @@ public class TopSpeciesWithMaxDiamTest {
         t3.setDiameter(85.0);
         t4.setScientificName("Jacarandá");
         t4.setDiameter(85.0);
-
+        trees.add(new Tree(null, null, "Laurel", 85d));
         trees.add(t1);
         trees.add(t2);
         trees.add(t3);
@@ -46,7 +46,7 @@ public class TopSpeciesWithMaxDiamTest {
 
         System.out.println(trees);
         try {
-            List<Map.Entry<String, Double>> map = TopSpeciesWithMaxDiam.query(hz, trees, 4);
+            List<Map.Entry<String, Double>> map = TopSpeciesWithMaxDiam.query(hz, trees, 2);
             System.out.println(map);
         } catch (HazelcastSerializationException e) {
             e.printStackTrace();
