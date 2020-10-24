@@ -13,6 +13,6 @@ public class CSVParser {
     }
 
     public static List<Tree> readTrees(String inPath, String city) {
-        return null;
+        return List.of();
     }
 }

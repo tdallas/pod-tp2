@@ -7,6 +7,7 @@ import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.KeyValueSource;
 import itba.pod.api.collators.TopNCollator;
 import itba.pod.api.combiners.AvgCombinerFactory;
+import itba.pod.api.mappers.DiameterPerSpeciesMapper;
 import itba.pod.api.mappers.PairSeparatorMapper;
 import itba.pod.api.model.Tree;
 import itba.pod.api.reducers.AvgReducerFactory;
@@ -37,21 +38,15 @@ public class TopSpeciesWithMaxDiam {
         ArgumentValidator.validate(addresses, city, inPath, outPath, nString);
         List<String> addressesList = Arrays.asList(addresses.split(";"));
         Integer n = Integer.valueOf(nString);
-
-        List<Tree> trees = CSVParser.readTrees(inPath, city);
-
         HazelCast hz = new HazelCast(addressesList);
+        IList<Tree> trees = hz.getList("g9dataSource");
 
-        IList<Pair<String, Double>> speciesAndDiameter = hz.getList("g9dataSource");
-        assert trees != null;
-        trees.forEach(t -> {
-            speciesAndDiameter.add(new Pair<>(t.getScientificName(), t.getDiameter()));
-        });
+        trees.addAll(CSVParser.readTrees(inPath, city));
 
         //TODO tomar tiempo y logearlo en un archivo
         List<Map.Entry<String, Double>> result = null;
         try {
-            result = TopSpeciesWithMaxDiam.query(hz, speciesAndDiameter, n);
+            result = TopSpeciesWithMaxDiam.query(hz, trees, n);
         } catch (Exception e) {
             // TODO manejar excepcion
         }
@@ -60,18 +55,18 @@ public class TopSpeciesWithMaxDiam {
 
     }
 
-    private static List<Map.Entry<String, Double>> query(HazelCast hz, IList<Pair<String, Double>> speciesAndDiameter, Integer n) throws ExecutionException, InterruptedException {
+    public static List<Map.Entry<String, Double>> query(final HazelCast hz,
+                                                    final IList<Tree> trees,
+                                                    final Integer n) throws ExecutionException, InterruptedException {
 
-        JobTracker jobTracker = hz.getJobTracker("g9topNSpecies");
-        final KeyValueSource<String, Pair<String,Double>> source = KeyValueSource.fromList(speciesAndDiameter);
-        Job<String, Pair<String,Double>> job = jobTracker.newJob(source);
+        final JobTracker jobTracker = hz.getJobTracker("g9topNSpecies");
+        final KeyValueSource<String, Tree> source = KeyValueSource.fromList(trees);
+        final Job<String, Tree> job = jobTracker.newJob(source);
 
-        //based on https://gist.github.com/noctarius/7784770
-        ICompletableFuture<List<Map.Entry<String,Double>>> future= job
-                .mapper(new PairSeparatorMapper<>())
-                .combiner(new AvgCombinerFactory<>())
-                .reducer(new AvgReducerFactory<>())
-                .submit(new TopNCollator<>(n));
+        ICompletableFuture<List<Map.Entry<String, Double>>> future = job
+                .mapper(new DiameterPerSpeciesMapper())
+                .reducer(new AvgReducerFactory())
+                .submit(new TopNCollator(n));
 
         return future.get();
     }
