@@ -14,6 +14,7 @@ import itba.pod.client.exceptions.InvalidArgumentException;
 import itba.pod.client.utils.ArgumentValidator;
 import itba.pod.client.utils.CSVParser;
 import itba.pod.client.utils.HazelCast;
+import itba.pod.client.utils.OutputFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,12 +32,16 @@ public class TreesPerPopulation {
         String city = System.getProperty("city");
         String inPath = System.getProperty("inPath");
         String outPath = System.getProperty("outPath");
+        OutputFiles outputFiles=new OutputFiles(outPath);
+
 
         ArgumentValidator.validate(addresses, city, inPath, outPath);
         List<String> addressesList = Arrays.asList(addresses.split(";"));
 
+        outputFiles.timeStampFile("Inicio de la lectura del archivo",1);
         Map<String, Neighbourhood> neighbourhoods = CSVParser.readNeighbourhoods(inPath, city);
         List<Tree> trees = CSVParser.readTrees(inPath, city);
+        outputFiles.timeStampFile("Fin de la lectura del archivo",1);
 
         HazelCast hz = new HazelCast(addressesList);
 
@@ -52,13 +57,15 @@ public class TreesPerPopulation {
         //      if (neighbourhoods.containsKey(t.getNeighbourhood())) neighbourhoodsWithTrees.add(t.getNeighbourhood());
         //  });
 
-        //TODO tomar tiempo y logearlo en un archivo
+        outputFiles.timeStampFile("Inicio del trabajo de map/reduce",1);
+
         Map<String, Long> result = null;
         try {
             result = TreesPerPopulation.query(hz, neighbourhoodsWithTrees);
         } catch (Exception e) {
             // TODO manejar excepcion
         }
+        outputFiles.timeStampFile("Fin del trabajo de map/reduce",1);
 
         Map<String, Double> calculated_result = new LinkedHashMap<>();
         assert result != null;
@@ -71,7 +78,7 @@ public class TreesPerPopulation {
                                                         .sorted(Comparator.comparingDouble(Map.Entry<String, Double>::getValue).reversed()
                                                                           .thenComparing(Map.Entry::getKey));
 
-        //TODO escribir sorted_result en outPath
+        outputFiles.treesPerPopulationWritter(sorted_result);
 
     }
 

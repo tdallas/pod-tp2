@@ -15,6 +15,7 @@ import itba.pod.client.exceptions.InvalidArgumentException;
 import itba.pod.client.utils.ArgumentValidator;
 import itba.pod.client.utils.CSVParser;
 import itba.pod.client.utils.HazelCast;
+import itba.pod.client.utils.OutputFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -31,12 +32,16 @@ public class StreetWithMaxTrees {
         String inPath = System.getProperty("inPath");
         String outPath = System.getProperty("outPath");
         String minString = System.getProperty("min");
+        OutputFiles outputFiles=new OutputFiles(outPath);
+
 
         ArgumentValidator.validate(addresses, city, inPath, outPath, minString);
         List<String> addressesList = Arrays.asList(addresses.split(";"));
         Integer min = Integer.valueOf(minString);
 
+        outputFiles.timeStampFile("Inicio de la lectura del archivo",2);
         List<Tree> trees = CSVParser.readTrees(inPath, city);
+        outputFiles.timeStampFile("Fin de la lectura del archivo",2);
 
         HazelCast hz = new HazelCast(addressesList);
 
@@ -46,13 +51,15 @@ public class StreetWithMaxTrees {
             streetAndNeighbourhood.add(new PairNeighbourhoodStreet(t.getStreet(), t.getNeighbourhood()));
         });
 
-        //TODO tomar tiempo y logearlo en un archivo
+        outputFiles.timeStampFile("Inicio del trabajo de map/reduce",2);
         List<Map.Entry<PairNeighbourhoodStreet, Long>> result = null;
         try {
             result = StreetWithMaxTrees.query(hz, streetAndNeighbourhood, min);
+
         } catch (Exception e) {
             // TODO manejar excepcion
         }
+        outputFiles.timeStampFile("Fin del trabajo de map/reduce",2);
 
         Map<PairNeighbourhoodStreet, Long> filtered_result = new HashMap<>();
         PairNeighbourhoodStreet pairPrev = null;
@@ -75,8 +82,7 @@ public class StreetWithMaxTrees {
             pairPrev = pairCurr.clone();
         }
 
-        //TODO escribir filtered_result en outPath
-
+        outputFiles.StreetWithMaxTreesWritter(filtered_result);
     }
 
     private static List<Map.Entry<PairNeighbourhoodStreet, Long>> query(HazelCast hz, IList<PairNeighbourhoodStreet> streetAndNeighbourhood, Integer min) throws ExecutionException, InterruptedException {

@@ -16,6 +16,7 @@ import itba.pod.client.exceptions.InvalidArgumentException;
 import itba.pod.client.utils.ArgumentValidator;
 import itba.pod.client.utils.CSVParser;
 import itba.pod.client.utils.HazelCast;
+import itba.pod.client.utils.OutputFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -33,12 +34,16 @@ public class TopSpeciesWithMaxDiam {
         String inPath = System.getProperty("inPath");
         String outPath = System.getProperty("outPath");
         String nString = System.getProperty("n");
+        OutputFiles outputFiles=new OutputFiles(outPath);
+
 
         ArgumentValidator.validate(addresses, city, inPath, outPath, nString);
         List<String> addressesList = Arrays.asList(addresses.split(";"));
         Integer n = Integer.valueOf(nString);
 
+        outputFiles.timeStampFile("Inicio de la lectura del archivo",3);
         List<Tree> trees = CSVParser.readTrees(inPath, city);
+        outputFiles.timeStampFile("Fin de la lectura del archivo",3);
 
         HazelCast hz = new HazelCast(addressesList);
 
@@ -48,15 +53,17 @@ public class TopSpeciesWithMaxDiam {
             speciesAndDiameter.add(new Pair<>(t.getScientificName(), t.getDiameter()));
         });
 
-        //TODO tomar tiempo y logearlo en un archivo
+        outputFiles.timeStampFile("Inicio del trabajo de map/reduce",3);
         List<Map.Entry<String, Double>> result = null;
         try {
             result = TopSpeciesWithMaxDiam.query(hz, speciesAndDiameter, n);
         } catch (Exception e) {
             // TODO manejar excepcion
         }
+        outputFiles.timeStampFile("Fin del trabajo de map/reduce",3);
 
-        //TODO escribir result in outPath
+        assert result != null;
+        outputFiles.TopSpeciesWithMaxDiamWritter(result);
 
     }
 
