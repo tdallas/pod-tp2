@@ -19,47 +19,24 @@
     - no hazelcast.xml if present
 
  -->
-<hazelcast xmlns="http://www.hazelcast.com/schema/config" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.hazelcast.com/schema/config hazelcast-config-3.5.xsd">
+<hazelcast xmlns="http://www.hazelcast.com/schema/config" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://www.hazelcast.com/schema/config hazelcast-config-3.5.xsd">
     <group>
-        <name>cluster</name>
-        <password>cluster-pass</password>
+        <name>g9</name>
+<!--        <password>g9</password>-->
     </group>
     <management-center enabled="false">http://localhost:8080/mancenter</management-center>
     <network>
-        <port auto-increment="true" port-count="100">5701</port>
-        <outbound-ports>
-            <!--
-                        Allowed port range when connecting to other nodes.
-                        0 or * means use system provided port.
-                         -->
-            <ports>0</ports>
-        </outbound-ports>
+        <port auto-increment="true" port-count="20">5701</port>
         <join>
-            <multicast enabled="true">
-                <multicast-group>224.2.2.3</multicast-group>
-                <multicast-port>54327</multicast-port>
-            </multicast>
-            <tcp-ip enabled="false">
-                <interface>127.0.0.1</interface>
-                <member-list>
-                    <member>127.0.0.1</member>
-                </member-list>
+            <multicast enabled="false"/>
+            <tcp-ip enabled="true">
+                <member>localhost</member>
             </tcp-ip>
-            <aws enabled="false">
-                <access-key>my-access-key</access-key>
-                <secret-key>my-secret-key</secret-key>
-                <!-- optional, default is us-east-1  -->
-                <region>us-west-1</region>
-                <!-- optional, default is ec2.amazonaws.com. If set, region shouldn't be set as it will override this property  -->
-                <host-header>ec2.amazonaws.com</host-header>
-                <!--  optional, only instances belonging to this group will be discovered, default will try all running instances  -->
-                <security-group-name>hazelcast-sg</security-group-name>
-                <tag-key>type</tag-key>
-                <tag-value>hz-nodes</tag-value>
-            </aws>
         </join>
+<!--        THIS IS COMMENTED BECAUSE IS NOT WORKING-->
         <interfaces enabled="true">
-            <interface>10.6.0.*</interface>
+            <interface>127.0.0.1</interface>
         </interfaces>
         <ssl enabled="false"/>
         <socket-interceptor enabled="false"/>

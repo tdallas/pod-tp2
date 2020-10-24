@@ -16,6 +16,7 @@ public class HazelCast {
     public HazelCast(List<String> addresses) {
         final ClientConfig config = new ClientConfig();
         // TODO setear usuario y contraseña
+        config.getGroupConfig().setName("g9");
         config.getNetworkConfig().setAddresses(addresses);
         this.instance = HazelcastClient.newHazelcastClient(config);
     }
