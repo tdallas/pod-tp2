@@ -8,19 +8,27 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-public class TopNCollator<T extends Comparable<T>> implements Collator<Map.Entry<String, T>, List<Map.Entry<String, T>>> {
-    private Integer n;
+public class TopNCollator implements Collator<Map.Entry<String, Double>, List<Map.Entry<String, Double>>> {
+    private final Integer n;
 
     public TopNCollator(Integer n) {
         this.n = n;
     }
 
-
     @Override
-    public List<Map.Entry<String,T>> collate(Iterable<Map.Entry<String,T>> values){
+    public List<Map.Entry<String, Double>> collate(Iterable<Map.Entry<String, Double>> values) {
         return StreamSupport.stream(values.spliterator(),false)
-                .sorted(Map.Entry.comparingByValue(Comparator.reverseOrder()))
+                .sorted(getDiameterComparator())
                 .limit(n)
                 .collect(Collectors.toList());
+    }
+
+    private Comparator<Map.Entry<String, Double>> getDiameterComparator() {
+        return (e1, e2) -> {
+            if (e1.getValue().equals(e2.getValue()))
+                return String.CASE_INSENSITIVE_ORDER.compare(e1.getKey(), e2.getKey());
+            else
+                return Double.compare(e2.getValue(), e1.getValue());
+        };
     }
 }

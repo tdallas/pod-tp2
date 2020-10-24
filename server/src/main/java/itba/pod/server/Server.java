@@ -13,10 +13,9 @@ public class Server {
     public static void main(String[] args) {
         logger.info("tpe2-g9-parent Server Starting ...");
         HazelcastInstance hzInstance = Hazelcast.newHazelcastInstance();
-        Map<Long, String> map = hzInstance.getMap("data");
-        for (int i = 0; i < 10; i++) {
-            map.put((long) i, "message" + i);
-        }
-
+//        Map<Long, String> map = hzInstance.getMap("data");
+//        for (int i = 0; i < 10; i++) {
+//            map.put((long) i, "message" + i);
+//        }
     }
 }
