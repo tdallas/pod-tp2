@@ -7,13 +7,17 @@ import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.KeyValueSource;
 import itba.pod.api.collators.TopNCollator;
 import itba.pod.api.combiners.AvgCombinerFactory;
+import itba.pod.api.mappers.DiameterPerSpeciesMapper;
 import itba.pod.api.mappers.PairSeparatorMapper;
 import itba.pod.api.model.Tree;
 import itba.pod.api.reducers.AvgReducerFactory;
 import itba.pod.api.utils.Pair;
 import itba.pod.api.utils.PairNeighbourhoodStreet;
+import itba.pod.client.exceptions.InvalidArgumentException;
+import itba.pod.client.utils.ArgumentValidator;
 import itba.pod.client.utils.CSVParser;
 import itba.pod.client.utils.HazelCast;
+import itba.pod.client.utils.OutputFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -25,44 +29,49 @@ import java.util.concurrent.ExecutionException;
 public class TopSpeciesWithMaxDiam {
     private static Logger logger = LoggerFactory.getLogger(TreesPerPopulation.class);
 
-    public static void main(String[] args) {
-        List<String> addresses = Arrays.asList(System.getProperty("addresses").split(";"));
+    public static void main(String[] args) throws InvalidArgumentException {
+        String addresses = System.getProperty("addresses");
         String city = System.getProperty("city");
         String inPath = System.getProperty("inPath");
         String outPath = System.getProperty("outPath");
-        Integer n = Integer.valueOf(System.getProperty("n"));
+        String nString = System.getProperty("n");
+        OutputFiles outputFiles=new OutputFiles(outPath);
 
-        List<Tree> trees = CSVParser.readTrees(inPath, city);
 
-        HazelCast hz = new HazelCast(addresses);
-        IList<Pair<String, Double>> queryTrees = hz.getList("allTrees");
-        assert trees != null;
-        trees.forEach(t -> {
-            queryTrees.add(new Pair<String, Double>(t.getScientificName(), t.getDiameter()));
-        });
+        ArgumentValidator.validate(addresses, city, inPath, outPath, nString);
+        List<String> addressesList = Arrays.asList(addresses.split(";"));
+        Integer n = Integer.valueOf(nString);
+        HazelCast hz = new HazelCast(addressesList);
+        IList<Tree> trees = hz.getList("g9dataSource");
 
-        //TODO tomar tiempo y logearlo en un archivo
-        List<Map.Entry<String, Double>> result = null;
+        outputFiles.timeStampFile("Inicio de la lectura del archivo",3);
+        trees.addAll(CSVParser.readTrees(inPath, city));
+        outputFiles.timeStampFile("Fin de la lectura del archivo",3);
+
+        outputFiles.timeStampFile("Inicio del trabajo de map/reduce",3);
+        List<Map.Entry<String, Double>> result = List.of();
+
         try {
-            result = TopSpeciesWithMaxDiam.query(hz, queryTrees, n);
+            result = TopSpeciesWithMaxDiam.query(hz, trees, n);
         } catch (Exception e) {
             // TODO manejar excepcion
         }
+        outputFiles.timeStampFile("Fin del trabajo de map/reduce",3);
 
-        //TODO escribir resutl
+        outputFiles.TopSpeciesWithMaxDiamWritter(result);
     }
 
-    private static List<Map.Entry<String, Double>> query(HazelCast hz, IList<Pair<String, Double>> queryTrees, Integer n) throws ExecutionException, InterruptedException {
-        JobTracker jobTracker = hz.getJobTracker("TopNSprecies");
-        final KeyValueSource<String, Pair<String,Double>> source = KeyValueSource.fromList(queryTrees);
-        Job<String, Pair<String,Double>> job = jobTracker.newJob(source);
+    public static List<Map.Entry<String, Double>> query(final HazelCast hz,
+                                                    final IList<Tree> trees,
+                                                    final Integer n) throws ExecutionException, InterruptedException {
+        final JobTracker jobTracker = hz.getJobTracker("g9topNSpecies");
+        final KeyValueSource<String, Tree> source = KeyValueSource.fromList(trees);
+        final Job<String, Tree> job = jobTracker.newJob(source);
 
-        //based on https://gist.github.com/noctarius/7784770
-        ICompletableFuture<List<Map.Entry<String,Double>>> future= job
-                .mapper(new PairSeparatorMapper<>())
-                .combiner(new AvgCombinerFactory<>())
-                .reducer(new AvgReducerFactory<>())
-                .submit(new TopNCollator<>(n));
+        ICompletableFuture<List<Map.Entry<String, Double>>> future = job
+                .mapper(new DiameterPerSpeciesMapper())
+                .reducer(new AvgReducerFactory())
+                .submit(new TopNCollator(n));
 
         return future.get();
     }
