@@ -1,6 +1,7 @@
 package itba.pod.client.utils;
 
 import itba.pod.api.utils.PairNeighbourhoodStreet;
+import itba.pod.api.utils.SortedPair;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -20,7 +21,7 @@ public class OutputFiles {
         this.outputFilePath = outputFilePath;
     }
 
-
+    // TODO ver si integers y longs se imprimen bien
 
     public void timeStampFile(String work, int queryN) {
 //        https://mkyong.com/java8/java-8-how-to-format-localdatetime/
@@ -38,8 +39,8 @@ public class OutputFiles {
 
 
     //query 1
-    public void treesPerPopulationWritter(Stream<Map.Entry<String, Double>> results) {
-        try (FileWriter fw = new FileWriter(outputFilePath + "query1.csv")) {
+    public void treesPerPopulationWriter(Stream<Map.Entry<String, Double>> results) {
+        try (FileWriter fw = new FileWriter(outputFilePath + "/query1.csv")) {
             StringBuilder sb = new StringBuilder();
             sb.append("BARRIO;ARBOLES_POR_HABITANTE\n");
             results.forEach((k) -> sb.append(k.getKey()).append(";").append(String.format("%.2f", k.getValue())).append("\n"));
@@ -51,8 +52,8 @@ public class OutputFiles {
     }
 
     //query 2
-    public void StreetWithMaxTreesWritter(Map<PairNeighbourhoodStreet, Long> results) {
-        try (FileWriter fw = new FileWriter(outputFilePath)) {
+    public void StreetWithMaxTreesWriter(Map<PairNeighbourhoodStreet, Long> results) {
+        try (FileWriter fw = new FileWriter(outputFilePath + "/query2.csv")) {
             StringBuilder sb = new StringBuilder();
             sb.append("BARRIO;CALLE_CON_MAS_ARBOLES;ARBOLES\n");
             results.forEach((k, v) -> sb.append(k.getNeighbourhood()).append(";").append(k.getStreet()).append(";").append(v).append("\n"));
@@ -64,8 +65,8 @@ public class OutputFiles {
     }
 
     //query 3
-    public void TopSpeciesWithMaxDiamWritter(List<Map.Entry<String, Double>> results) {
-        try (FileWriter fw = new FileWriter(outputFilePath)) {
+    public void TopSpeciesWithMaxDiamWriter(List<Map.Entry<String, Double>> results) {
+        try (FileWriter fw = new FileWriter(outputFilePath + "/query3.csv")) {
             StringBuilder sb = new StringBuilder();
             sb.append("NOMBRE_CIENTIFICO;PROMEDIO_DIAMETRO\n");
             results.forEach((k) -> sb.append(k.getKey()).append(";").append(String.format("%.2f", k.getValue())).append("\n"));
@@ -76,4 +77,16 @@ public class OutputFiles {
         }
     }
 
+    //query 5
+    public void NeighbourhoodsPairsWithThousandTreesWriter(List<Map.Entry<Long, SortedPair<String>>> results) {
+        try (FileWriter fw = new FileWriter(outputFilePath + "/query5.csv")) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Grupo;Barrio A;Barrio B\n");
+            results.forEach((k) -> sb.append(k.getKey()).append(";").append(k.getValue().getA()).append(";").append(k.getValue().getB()).append("\n"));
+            fw.write(sb.toString());
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }

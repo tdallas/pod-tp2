@@ -22,7 +22,6 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.stream.Collectors;
 
 public class StreetWithMaxTrees {
     private static Logger logger = LoggerFactory.getLogger(TreesPerPopulation.class);
@@ -65,7 +64,7 @@ public class StreetWithMaxTrees {
         assert result != null;
         Map<PairNeighbourhoodStreet,Long> filtered_result=filtered_result(result);
 
-        outputFiles.StreetWithMaxTreesWritter(filtered_result);
+        outputFiles.StreetWithMaxTreesWriter(filtered_result);
     }
 
     public static Map<PairNeighbourhoodStreet,Long> filtered_result(List<Map.Entry<PairNeighbourhoodStreet, Long>> result){

@@ -6,13 +6,9 @@ import com.hazelcast.mapreduce.Job;
 import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.KeyValueSource;
 import itba.pod.api.collators.TopNCollator;
-import itba.pod.api.combiners.AvgCombinerFactory;
 import itba.pod.api.mappers.DiameterPerSpeciesMapper;
-import itba.pod.api.mappers.PairSeparatorMapper;
 import itba.pod.api.model.Tree;
 import itba.pod.api.reducers.AvgReducerFactory;
-import itba.pod.api.utils.Pair;
-import itba.pod.api.utils.PairNeighbourhoodStreet;
 import itba.pod.client.exceptions.InvalidArgumentException;
 import itba.pod.client.utils.ArgumentValidator;
 import itba.pod.client.utils.CSVParser;
@@ -61,7 +57,7 @@ public class TopSpeciesWithMaxDiam {
         }
         outputFiles.timeStampFile("Fin del trabajo de map/reduce",3);
 
-        outputFiles.TopSpeciesWithMaxDiamWritter(result);
+        outputFiles.TopSpeciesWithMaxDiamWriter(result);
     }
 
     public static List<Map.Entry<String, Double>> query(final HazelCast hz,
