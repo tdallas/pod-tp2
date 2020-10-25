@@ -47,10 +47,10 @@ public class TreesPerPopulation {
         HazelCast hz = new HazelCast(addressesList);
 
         IList<String> neighbourhoodsWithTrees = hz.getList("g9dataSource");
-        neighbourhoodsWithTrees = (IList<String>) trees.stream()
-                .map(Tree::getNeighbourhood)
-                .filter(neighbourhoods::containsKey)
-                .collect(Collectors.toList());
+
+        trees.forEach(t->{
+            if(neighbourhoods.containsKey(t.getNeighbourhood())) neighbourhoodsWithTrees.add(t.getNeighbourhood());
+        });
 
         outputFiles.timeStampFile("Inicio del trabajo de map/reduce",1);
 

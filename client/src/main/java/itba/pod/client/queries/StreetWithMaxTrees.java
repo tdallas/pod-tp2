@@ -35,13 +35,13 @@ public class StreetWithMaxTrees {
 
         ArgumentValidator.validate(addresses, city, inPath, outPath, minString);
         List<String> addressesList = Arrays.asList(addresses.split(";"));
-        OutputFiles outputFiles=new OutputFiles(outPath);
+        OutputFiles outputFiles = new OutputFiles(outPath);
         Integer min = Integer.valueOf(minString);
 
-        outputFiles.timeStampFile("Inicio de la lectura del archivo",2);
+        outputFiles.timeStampFile("Inicio de la lectura del archivo", 2);
         CSVParser parser = new CSVParser();
         List<Tree> trees = parser.readTrees(inPath, city);
-        outputFiles.timeStampFile("Fin de la lectura del archivo",2);
+        outputFiles.timeStampFile("Fin de la lectura del archivo", 2);
 
         HazelCast hz = new HazelCast(addressesList);
         IList<PairNeighbourhoodStreet> streetAndNeighbourhood = hz.getList("g9dataSource");
@@ -51,7 +51,7 @@ public class StreetWithMaxTrees {
             streetAndNeighbourhood.add(new PairNeighbourhoodStreet(t.getStreet(), t.getNeighbourhood()));
         });
 
-        outputFiles.timeStampFile("Inicio del trabajo de map/reduce",2);
+        outputFiles.timeStampFile("Inicio del trabajo de map/reduce", 2);
         List<Map.Entry<PairNeighbourhoodStreet, Long>> result = null;
         try {
             result = StreetWithMaxTrees.query(hz, streetAndNeighbourhood, min);
@@ -59,20 +59,21 @@ public class StreetWithMaxTrees {
         } catch (Exception e) {
             // TODO manejar excepcion
         }
-        outputFiles.timeStampFile("Fin del trabajo de map/reduce",2);
+        outputFiles.timeStampFile("Fin del trabajo de map/reduce", 2);
 
         assert result != null;
-        Map<PairNeighbourhoodStreet,Long> filtered_result=filtered_result(result);
+        Map<PairNeighbourhoodStreet, Long> filtered_result = filtered_result(result);
 
         outputFiles.StreetWithMaxTreesWriter(filtered_result);
     }
 
-    public static Map<PairNeighbourhoodStreet,Long> filtered_result(List<Map.Entry<PairNeighbourhoodStreet, Long>> result){
+    public static Map<PairNeighbourhoodStreet, Long> filtered_result(List<Map.Entry<PairNeighbourhoodStreet, Long>> result) {
         Map<PairNeighbourhoodStreet, Long> filtered_result = new HashMap<>();
         PairNeighbourhoodStreet pairPrev = null;
         PairNeighbourhoodStreet pairMax = null;
         Long count = Long.MIN_VALUE;
         assert result != null;
+
         for (Map.Entry<PairNeighbourhoodStreet, Long> entry : result) {
             PairNeighbourhoodStreet pairCurr = entry.getKey();
 
@@ -80,16 +81,21 @@ public class StreetWithMaxTrees {
                 filtered_result.put(pairMax, count);
                 pairMax = null;
                 count = Long.MIN_VALUE;
-            } else {
-                if (entry.getValue() > count) {
-                    pairMax = pairCurr.clone();
-                    count = entry.getValue();
-                }
             }
+            if (entry.getValue() > count) {
+                pairMax = pairCurr.clone();
+                count = entry.getValue();
+            }
+
             pairPrev = pairCurr.clone();
         }
+        if (result.size() > 0) {
+            filtered_result.put(pairMax, count);
+        }
+
         return filtered_result;
     }
+
     public static List<Map.Entry<PairNeighbourhoodStreet, Long>> query(HazelCast hz, IList<PairNeighbourhoodStreet> streetAndNeighbourhood, Integer min) throws ExecutionException, InterruptedException {
 
         JobTracker jobTracker = hz.getJobTracker("g9streetMaxTrees");
