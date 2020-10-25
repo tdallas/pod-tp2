@@ -49,7 +49,8 @@ public class TopSpeciesWithMaxDiam {
         outputFiles.timeStampFile("Fin de la lectura del archivo",3);
 
         outputFiles.timeStampFile("Inicio del trabajo de map/reduce",3);
-        List<Map.Entry<String, Double>> result = null;
+        List<Map.Entry<String, Double>> result = List.of();
+
         try {
             result = TopSpeciesWithMaxDiam.query(hz, trees, n);
         } catch (Exception e) {
@@ -57,15 +58,12 @@ public class TopSpeciesWithMaxDiam {
         }
         outputFiles.timeStampFile("Fin del trabajo de map/reduce",3);
 
-        assert result != null;
         outputFiles.TopSpeciesWithMaxDiamWritter(result);
-
     }
 
     public static List<Map.Entry<String, Double>> query(final HazelCast hz,
                                                     final IList<Tree> trees,
                                                     final Integer n) throws ExecutionException, InterruptedException {
-
         final JobTracker jobTracker = hz.getJobTracker("g9topNSpecies");
         final KeyValueSource<String, Tree> source = KeyValueSource.fromList(trees);
         final Job<String, Tree> job = jobTracker.newJob(source);

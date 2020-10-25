@@ -71,20 +71,4 @@ public class Tree implements CSVEntry, DataSerializable {
     public int hashCode() {
         return Objects.hash(neighbourhood, street, scientificName, diameter);
     }
-
-    public void setNeighbourhood(String neighbourhood) {
-        this.neighbourhood = neighbourhood;
-    }
-
-    public void setStreet(String street) {
-        this.street = street;
-    }
-
-    public void setScientificName(String scientificName) {
-        this.scientificName = scientificName;
-    }
-
-    public void setDiameter(Double diameter) {
-        this.diameter = diameter;
-    }
 }
