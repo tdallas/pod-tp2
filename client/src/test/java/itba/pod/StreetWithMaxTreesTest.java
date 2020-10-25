@@ -15,6 +15,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertTrue;
 
 public class StreetWithMaxTreesTest {
     HazelCast hz;
@@ -34,7 +35,7 @@ public class StreetWithMaxTreesTest {
     public void StreetMaxTrees() throws ExecutionException, InterruptedException {
         Map<PairNeighbourhoodStreet,Long> expected=new LinkedHashMap<>();
         expected.put(new PairNeighbourhoodStreet("ABC","11"),3L);
-        expected.put(new PairNeighbourhoodStreet("DEF","12"),3L);
+        expected.put(new PairNeighbourhoodStreet("ABC","12"),3L);
 
 
         streetAndNeighbourhood.add(new PairNeighbourhoodStreet("ABC","12"));
@@ -49,6 +50,7 @@ public class StreetWithMaxTreesTest {
         List<Map.Entry<PairNeighbourhoodStreet, Long>> result =StreetWithMaxTrees.query(hz, streetAndNeighbourhood, 1);
         Map<PairNeighbourhoodStreet,Long> filtered_result=StreetWithMaxTrees.filtered_result(result);
 
+        assertEquals(expected.size(),filtered_result.size());
         assertEquals(expected, filtered_result);
 
 
@@ -56,10 +58,5 @@ public class StreetWithMaxTreesTest {
 
 
 
-
-
-
-
-
-    }
+   }
 }
