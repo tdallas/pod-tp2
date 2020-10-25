@@ -5,6 +5,7 @@ import itba.pod.api.model.Neighbourhood;
 import itba.pod.api.model.Tree;
 import itba.pod.client.utils.CSVParser;
 
+import itba.pod.client.utils.GetPropertyValues;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -13,21 +14,23 @@ import java.util.List;
 import java.util.Map;
 
 public class CSVParserTest {
-    public static final CSVParser parser = new CSVParser();
-    public static final String resourcesPath = "/home/lucas/Documents/pod-tp2/server/src/test/resources/";
+    private static final CSVParser parser = new CSVParser();
+    private GetPropertyValues properties = new GetPropertyValues();
+    private static final String resourcesPath = "src/test/resources/";
 
     @Test
     // TODO: Add assert
     public void fakeTestReadTreesCSV() {
-        Map<String, String> map = new HashMap<>();
+        String city = "BUE";
 
-        map.put(Tree.NEIGHBOURHOOD, "comuna");
-        map.put(Tree.STREET, "calle_nombre");
-        map.put(Tree.SCIENTIFIC_NAME, "nombre_cientifico");
-        map.put(Tree.DIAMETER, "diametro_altura_pecho");
+        Map<String, String> map = new HashMap<>();
+        map.put(Tree.NEIGHBOURHOOD, properties.getPropValue(city + '.' + Tree.NEIGHBOURHOOD));
+        map.put(Tree.STREET, properties.getPropValue(city + '.' + Tree.STREET));
+        map.put(Tree.SCIENTIFIC_NAME, properties.getPropValue(city + '.' + Tree.SCIENTIFIC_NAME));
+        map.put(Tree.DIAMETER, properties.getPropValue(city + '.' + Tree.DIAMETER));
 
         try {
-            List<CSVEntry> csvEntryList = parser.readTreesCSV("BUE", resourcesPath, map);
+            List<CSVEntry> csvEntryList = parser.readTreesCSV(city, resourcesPath, map);
 
             for (CSVEntry csvEntry : csvEntryList) {
                 System.out.println(csvEntry.toString());
@@ -40,13 +43,14 @@ public class CSVParserTest {
     @Test
     // TODO: Add assert// TODO: Add assert
     public void fakeTestReadNeighbourhoodsCSV() {
-        Map<String, String> map = new HashMap<>();
+        String city = "BUE";
 
-        map.put(Neighbourhood.NAME, "nombre");
-        map.put(Neighbourhood.POPULATION, "habitantes");
+        Map<String, String> map = new HashMap<>();
+        map.put(Neighbourhood.NAME, properties.getPropValue(Neighbourhood.NAME));
+        map.put(Neighbourhood.POPULATION, properties.getPropValue(Neighbourhood.POPULATION));
 
         try {
-            List<CSVEntry> csvEntryList = parser.readNeighbourhoodsCSV("BUE", resourcesPath, map);
+            List<CSVEntry> csvEntryList = parser.readNeighbourhoodsCSV(city, resourcesPath, map);
 
             for (CSVEntry csvEntry : csvEntryList) {
                 System.out.println(csvEntry.toString());

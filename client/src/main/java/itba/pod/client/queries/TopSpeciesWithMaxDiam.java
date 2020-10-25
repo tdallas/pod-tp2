@@ -21,6 +21,7 @@ import itba.pod.client.utils.OutputFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -29,23 +30,25 @@ import java.util.concurrent.ExecutionException;
 public class TopSpeciesWithMaxDiam {
     private static Logger logger = LoggerFactory.getLogger(TreesPerPopulation.class);
 
-    public static void main(String[] args) throws InvalidArgumentException {
+    public static void main(String[] args) throws InvalidArgumentException, IOException {
         String addresses = System.getProperty("addresses");
         String city = System.getProperty("city");
         String inPath = System.getProperty("inPath");
         String outPath = System.getProperty("outPath");
         String nString = System.getProperty("n");
-        OutputFiles outputFiles=new OutputFiles(outPath);
-
 
         ArgumentValidator.validate(addresses, city, inPath, outPath, nString);
         List<String> addressesList = Arrays.asList(addresses.split(";"));
+        OutputFiles outputFiles = new OutputFiles(outPath);
         Integer n = Integer.valueOf(nString);
+
         HazelCast hz = new HazelCast(addressesList);
+
         IList<Tree> trees = hz.getList("g9dataSource");
 
         outputFiles.timeStampFile("Inicio de la lectura del archivo",3);
-        trees.addAll(CSVParser.readTrees(inPath, city));
+        CSVParser parser = new CSVParser();
+        trees.addAll(parser.readTrees(inPath, city));
         outputFiles.timeStampFile("Fin de la lectura del archivo",3);
 
         outputFiles.timeStampFile("Inicio del trabajo de map/reduce",3);

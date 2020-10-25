@@ -18,15 +18,37 @@ public class CSVParser {
 
     private static final String DELIMITER = ";";
 
-    // String es el nombre del neighbourhood
-    public static Map<String, Neighbourhood> readNeighbourhoods(String inPath, String city) {
-        // TODO
-        return null;
+    private GetPropertyValues properties;
+
+    public CSVParser() {
+         properties = new GetPropertyValues();
     }
 
-    public static List<Tree> readTrees(String inPath, String city) {
-        // TODO
-        return null;
+    public Map<String, Neighbourhood> readNeighbourhoods(String inPath, String city) throws IOException {
+        Map<String, String> fieldsMap = new HashMap<>();
+        fieldsMap.put(Neighbourhood.NAME, properties.getPropValue(Neighbourhood.NAME));
+        fieldsMap.put(Neighbourhood.POPULATION, properties.getPropValue(Neighbourhood.POPULATION));
+
+        Map<String, Neighbourhood> result = new HashMap<>();
+        for (CSVEntry entry : readNeighbourhoodsCSV(city, inPath, fieldsMap)) {
+            Neighbourhood neighbourhood = (Neighbourhood) entry;
+            result.put(neighbourhood.getName(), neighbourhood);
+        }
+        return result;
+    }
+
+    public List<Tree> readTrees(String inPath, String city) throws IOException {
+        Map<String, String> fieldsMap = new HashMap<>();
+        fieldsMap.put(Tree.NEIGHBOURHOOD, properties.getPropValue(city + '.' + Tree.NEIGHBOURHOOD));
+        fieldsMap.put(Tree.STREET, properties.getPropValue(city + '.' + Tree.STREET));
+        fieldsMap.put(Tree.SCIENTIFIC_NAME, properties.getPropValue(city + '.' + Tree.SCIENTIFIC_NAME));
+        fieldsMap.put(Tree.DIAMETER, properties.getPropValue(city + '.' + Tree.DIAMETER));
+
+        List<Tree> result = new LinkedList<>();
+        for (CSVEntry entry : readTreesCSV(city, inPath, fieldsMap)) {
+            result.add((Tree)entry);
+        }
+        return result;
     }
 
     /**
