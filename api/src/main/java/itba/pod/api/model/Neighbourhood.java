@@ -16,8 +16,8 @@ public class Neighbourhood implements CSVEntry, DataSerializable {
     public static final String NAME = "NAME";
     public static final String POPULATION = "POPULATION";
 
-    private final String name;
-    private final Integer population;
+    private String name;
+    private Integer population;
 
     public Neighbourhood(String name, Integer population) {
         this.name = name;
