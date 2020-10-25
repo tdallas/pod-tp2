@@ -12,13 +12,7 @@ public class AvgReducerFactory implements ReducerFactory<String, Double, Double>
 
     private class AvgReducer extends Reducer<Double, Double> {
         private double sum;
-        private int count;
-
-        @Override
-        public void beginReduce() {
-            sum = 0;
-            count = 0;
-        }
+        private long count;
 
         @Override
         public void reduce(Double diameter) {
@@ -28,7 +22,7 @@ public class AvgReducerFactory implements ReducerFactory<String, Double, Double>
 
         @Override
         public Double finalizeReduce() {
-            return count == 0 ? 0.0 : sum/count;
+            return count == 0L ? 0.0d : sum / count;
         }
     }
 }

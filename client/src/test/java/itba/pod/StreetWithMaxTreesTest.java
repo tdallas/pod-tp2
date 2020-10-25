@@ -1,4 +1,4 @@
-package itba;
+package itba.pod;
 
 import com.hazelcast.core.IList;
 import itba.pod.api.model.Tree;
@@ -34,7 +34,7 @@ public class StreetWithMaxTreesTest {
     public void StreetMaxTrees() throws ExecutionException, InterruptedException {
         Map<PairNeighbourhoodStreet,Long> expected=new LinkedHashMap<>();
         expected.put(new PairNeighbourhoodStreet("ABC","11"),3L);
-        expected.put(new PairNeighbourhoodStreet("ABC","12"),3L);
+        expected.put(new PairNeighbourhoodStreet("DEF","12"),3L);
 
 
         streetAndNeighbourhood.add(new PairNeighbourhoodStreet("ABC","12"));

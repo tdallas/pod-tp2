@@ -4,20 +4,19 @@ import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
 import com.hazelcast.nio.serialization.DataSerializable;
 
-   
+
 import java.io.IOException;
 import java.util.Objects;
 
 public class Neighbourhood implements CSVEntry, DataSerializable {
 
- 
-    
-     // Neighbourhood fields (standard name)
+
+    // Neighbourhood fields (standard name)
     public static final String NAME = "NAME";
     public static final String POPULATION = "POPULATION";
 
-    private final String name;
-    private final Integer population;
+    private String name;
+    private Integer population;
 
     public Neighbourhood(String name, Integer population) {
         this.name = name;
@@ -45,8 +44,8 @@ public class Neighbourhood implements CSVEntry, DataSerializable {
 
     @Override
     public void readData(ObjectDataInput objectDataInput) throws IOException {
-        this.name= objectDataInput.readUTF();
-        this.population=objectDataInput.readInt();
+        this.name = objectDataInput.readUTF();
+        this.population = objectDataInput.readInt();
     }
 
     @Override

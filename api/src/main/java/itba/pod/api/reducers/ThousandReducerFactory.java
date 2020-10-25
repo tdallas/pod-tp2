@@ -9,14 +9,9 @@ public class ThousandReducerFactory implements ReducerFactory<String, Long, Long
         return new ThousandReducer();
     }
 
-    private class ThousandReducer extends Reducer<Long, Long> {
+    private static class ThousandReducer extends Reducer<Long, Long> {
 
         private long trees;
-
-        @Override
-        public void beginReduce() {
-            trees = 0;
-        }
 
         @Override
         public void reduce(Long value) {
@@ -25,7 +20,8 @@ public class ThousandReducerFactory implements ReducerFactory<String, Long, Long
 
         @Override
         public Long finalizeReduce() {
-            return (trees/1000) * 1000;
+            return (Math.floorDiv(trees, 1000L)) * 1000;
         }
+
     }
 }

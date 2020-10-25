@@ -14,11 +14,6 @@ public class CounterReducerFactory<K> implements ReducerFactory<K, Long, Long> {
         private volatile long sum;
 
         @Override
-        public void beginReduce() {
-            sum = 0;
-        }
-
-        @Override
         public void reduce(Long value) {
             sum += value;
         }

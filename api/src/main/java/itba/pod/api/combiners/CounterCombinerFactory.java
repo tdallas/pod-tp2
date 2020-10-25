@@ -11,7 +11,7 @@ public class CounterCombinerFactory<K> implements CombinerFactory<K, Long, Long>
     }
 
     private class CounterCombiner extends Combiner<Long, Long> {
-        private long sum = 0;
+        private long sum;
 
         @Override
         public void combine(Long value) {
@@ -25,7 +25,7 @@ public class CounterCombinerFactory<K> implements CombinerFactory<K, Long, Long>
 
         @Override
         public void reset() {
-            sum = 0;
+            sum = 0L;
         }
     }
 }

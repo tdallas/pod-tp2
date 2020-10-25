@@ -1,4 +1,4 @@
-package itba;
+package itba.pod;
 
 import com.hazelcast.core.IList;
 import itba.pod.api.model.Tree;

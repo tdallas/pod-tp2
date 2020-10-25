@@ -4,31 +4,31 @@ import com.hazelcast.mapreduce.Combiner;
 import com.hazelcast.mapreduce.CombinerFactory;
 import itba.pod.api.utils.Pair;
 
-public class AvgCombinerFactory<K> implements CombinerFactory<K, Double, Pair<Double,Integer>> {
+public class AvgCombinerFactory<K> implements CombinerFactory<K, Double, Pair<Double, Integer>> {
     @Override
-    public Combiner<Double,  Pair<Double,Integer>> newCombiner(K key) {
+    public Combiner<Double, Pair<Double, Integer>> newCombiner(K key) {
         return new AvgCombiner();
     }
 
-    private class AvgCombiner extends Combiner<Double,  Pair<Double,Integer>> {
-        private double sum = 0;
-        private int total= 0;
+    private class AvgCombiner extends Combiner<Double, Pair<Double, Integer>> {
+        private double sum;
+        private int total;
 
         @Override
         public void combine(Double value) {
-            sum+=value;
+            sum += value;
             total++;
         }
 
         @Override
-        public Pair<Double,Integer> finalizeChunk() {
-            return new Pair<>(sum,total);
+        public Pair<Double, Integer> finalizeChunk() {
+            return new Pair<>(sum, total);
         }
 
         @Override
         public void reset() {
-            sum = 0;
-            total=0;
+            sum = 0.0d;
+            total = 0;
         }
     }
 }

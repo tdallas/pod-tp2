@@ -1,4 +1,4 @@
-package itba;
+package itba.pod;
 
 import itba.pod.api.model.CSVEntry;
 import itba.pod.api.model.Neighbourhood;
