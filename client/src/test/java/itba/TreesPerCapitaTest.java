@@ -2,7 +2,7 @@ package itba;
 
 import com.hazelcast.core.IList;
 import itba.pod.api.model.Neighbourhood;
-import itba.pod.client.queries.TreesPerPopulation;
+import itba.pod.client.queries.TreesPerCapita;
 import itba.pod.client.utils.HazelCast;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,10 +18,10 @@ import java.util.stream.Stream;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
-public class TreesPerPopulationTest {
+public class TreesPerCapitaTest {
     private HazelCast hz;
     private IList<String> trees;
-    private Map<String, Neighbourhood> neighbourhoods=new LinkedHashMap<>();
+    private Map<String, Neighbourhood> neighbourhoods = new LinkedHashMap<>();
 
     @Before
     public void createTrees() {
@@ -34,7 +34,7 @@ public class TreesPerPopulationTest {
     }
 
     @Test
-    public void testTreesPerPopulation() throws ExecutionException, InterruptedException {
+    public void testTreesPerCapita() throws ExecutionException, InterruptedException {
         Map<String, Double> expected = new LinkedHashMap<>();
         expected.put("9",0.75);
         expected.put("10",0.50);
@@ -51,8 +51,8 @@ public class TreesPerPopulationTest {
         trees.add("9");trees.add("9");trees.add("9");
         trees.add("11");
 
-        Map<String, Long> query=TreesPerPopulation.query(hz,trees);
-        Stream<Map.Entry<String, Double>> sorted_result= TreesPerPopulation.filterResult(query,neighbourhoods);
+        Map<String, Long> query=TreesPerCapita.query(hz,trees);
+        Stream<Map.Entry<String, Double>> sorted_result= TreesPerCapita.filterResult(query,neighbourhoods);
 
         LinkedHashMap<String,Double> map =
                 sorted_result.collect(Collectors.toMap(Map.Entry::getKey,

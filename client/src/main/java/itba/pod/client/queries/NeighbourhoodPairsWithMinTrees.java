@@ -62,7 +62,8 @@ public class NeighbourhoodPairsWithMinTrees {
 
         outputFiles.timeStampFile("Fin del trabajo de map/reduce",3);
 
-        NeighbourhoodPairsWithMinTrees.pairNeighbourhoods(result);
+        List<Map.Entry<String, String>> neighbourhoodPairs = NeighbourhoodPairsWithMinTrees.pairNeighbourhoods(result);
+        outputFiles.writeNeighbourhoodPairsWithMinTrees(neighbourhoodPairs);
     }
 
     public static List<Map.Entry<String, Long>> query(HazelCast hz, final IList<Tree> trees, Integer minTrees, String species)
@@ -76,7 +77,7 @@ public class NeighbourhoodPairsWithMinTrees {
                 .mapper(new MinTreesMapper(species))
                 .combiner(new CounterCombinerFactory<>())
                 .reducer(new CounterReducerFactory<>())
-                .submit(new BiggerThanCollator<>(minTrees));
+                .submit(new BiggerThanCollator<>(minTrees - 1));
 
         return future.get();
     }

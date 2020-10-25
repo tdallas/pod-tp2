@@ -60,7 +60,7 @@ public class NeighbourhoodsPairsWithThousandTrees {
 
         List<Map.Entry<Long, SortedPair<String>>> paired_result = pairResult(result);
 
-        outputFiles.NeighbourhoodsPairsWithThousandTreesWriter(paired_result);
+        outputFiles.writeNeighbourhoodPairsWithThousandTrees(paired_result);
     }
 
     public static Map<String, Long> query(HazelCast hz, IList<String> neighbourhoodsWithTrees)

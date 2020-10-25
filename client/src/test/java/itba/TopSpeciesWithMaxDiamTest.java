@@ -30,20 +30,15 @@ public class TopSpeciesWithMaxDiamTest {
         double diameter = 60.0;
         final List<String> orderedNames = Arrays.asList("Abedul", "Jacarandá", "Lapacho", "Laurel");
 
-        var t1 = new Tree("", "", orderedNames.get(0), diameter);
-        var t2 = new Tree("", "", orderedNames.get(1), diameter);
-        var t3 = new Tree("", "", orderedNames.get(2), diameter);
-        var t4 = new Tree("", "", orderedNames.get(3), diameter);
-
         // Keep the the "unordered order", it's what's being tested
-        trees.add(t4);
-        trees.add(t2);
-        trees.add(t1);
-        trees.add(t3);
+        trees.add(new Tree("", "", orderedNames.get(3), diameter));
+        trees.add(new Tree("", "", orderedNames.get(1), diameter));
+        trees.add(new Tree("", "", orderedNames.get(0), diameter));
+        trees.add(new Tree("", "", orderedNames.get(2), diameter));
 
         final List<Map.Entry<String, Double>> queryResult = TopSpeciesWithMaxDiam.query(hz, trees, trees.size());
 
-        assertArrayEquals(queryResult.stream().map(Map.Entry::getKey).toArray(), orderedNames.toArray());
+        assertArrayEquals(orderedNames.toArray(), queryResult.stream().map(Map.Entry::getKey).toArray());
     }
 
     @Test
@@ -56,7 +51,7 @@ public class TopSpeciesWithMaxDiamTest {
 
         final List<Map.Entry<String, Double>> queryResult = TopSpeciesWithMaxDiam.query(hz, trees, trees.size());
 
-        assertArrayEquals(queryResult.stream().map(Map.Entry::getValue).toArray(), orderedDiameters);
+        assertArrayEquals(orderedDiameters, queryResult.stream().map(Map.Entry::getValue).toArray());
     }
 
     @Test

@@ -24,9 +24,9 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class TreesPerPopulation {
+public class TreesPerCapita {
 
-    private static Logger logger = LoggerFactory.getLogger(TreesPerPopulation.class);
+    private static Logger logger = LoggerFactory.getLogger(TreesPerCapita.class);
     
     public static void main(String[] args) throws InvalidArgumentException, IOException {
         String addresses = System.getProperty("addresses");
@@ -56,7 +56,7 @@ public class TreesPerPopulation {
 
         Map<String, Long> result = null;
         try {
-            result = TreesPerPopulation.query(hz, neighbourhoodsWithTrees);
+            result = TreesPerCapita.query(hz, neighbourhoodsWithTrees);
         } catch (Exception e) {
             // TODO manejar excepcion
         }
@@ -65,7 +65,7 @@ public class TreesPerPopulation {
         assert result != null;
         Stream<Map.Entry<String, Double>> sorted_result=filterResult(result,neighbourhoods);
 
-        outputFiles.treesPerPopulationWriter(sorted_result);
+        outputFiles.writeTreesPerCapita(sorted_result);
 
     }
 

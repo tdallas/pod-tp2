@@ -24,7 +24,7 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 
 public class StreetWithMaxTrees {
-    private static Logger logger = LoggerFactory.getLogger(TreesPerPopulation.class);
+    private static Logger logger = LoggerFactory.getLogger(TreesPerCapita.class);
 
     public static void main(String[] args) throws InvalidArgumentException, IOException {
         String addresses = System.getProperty("addresses");
@@ -64,7 +64,7 @@ public class StreetWithMaxTrees {
         assert result != null;
         Map<PairNeighbourhoodStreet,Long> filtered_result=filtered_result(result);
 
-        outputFiles.StreetWithMaxTreesWriter(filtered_result);
+        outputFiles.writeStreetWithMaxTrees(filtered_result);
     }
 
     public static Map<PairNeighbourhoodStreet,Long> filtered_result(List<Map.Entry<PairNeighbourhoodStreet, Long>> result){
