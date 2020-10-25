@@ -18,6 +18,7 @@ import itba.pod.client.utils.OutputFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -27,20 +28,20 @@ public class TreesPerPopulation {
 
     private static Logger logger = LoggerFactory.getLogger(TreesPerPopulation.class);
     
-    public static void main(String[] args) throws InvalidArgumentException {
+    public static void main(String[] args) throws InvalidArgumentException, IOException {
         String addresses = System.getProperty("addresses");
         String city = System.getProperty("city");
         String inPath = System.getProperty("inPath");
         String outPath = System.getProperty("outPath");
-        OutputFiles outputFiles=new OutputFiles(outPath);
-
 
         ArgumentValidator.validate(addresses, city, inPath, outPath);
         List<String> addressesList = Arrays.asList(addresses.split(";"));
+        OutputFiles outputFiles=new OutputFiles(outPath);
 
         outputFiles.timeStampFile("Inicio de la lectura del archivo",1);
-        Map<String, Neighbourhood> neighbourhoods = CSVParser.readNeighbourhoods(inPath, city);
-        List<Tree> trees = CSVParser.readTrees(inPath, city);
+        CSVParser parser = new CSVParser();
+        Map<String, Neighbourhood> neighbourhoods = parser.readNeighbourhoods(inPath, city);
+        List<Tree> trees = parser.readTrees(inPath, city);
         outputFiles.timeStampFile("Fin de la lectura del archivo",1);
 
         HazelCast hz = new HazelCast(addressesList);

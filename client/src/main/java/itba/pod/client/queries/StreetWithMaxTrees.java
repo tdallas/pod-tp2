@@ -19,6 +19,7 @@ import itba.pod.client.utils.OutputFiles;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -26,21 +27,21 @@ import java.util.stream.Collectors;
 public class StreetWithMaxTrees {
     private static Logger logger = LoggerFactory.getLogger(TreesPerPopulation.class);
 
-    public static void main(String[] args) throws InvalidArgumentException {
+    public static void main(String[] args) throws InvalidArgumentException, IOException {
         String addresses = System.getProperty("addresses");
         String city = System.getProperty("city");
         String inPath = System.getProperty("inPath");
         String outPath = System.getProperty("outPath");
         String minString = System.getProperty("min");
-        OutputFiles outputFiles=new OutputFiles(outPath);
-
 
         ArgumentValidator.validate(addresses, city, inPath, outPath, minString);
         List<String> addressesList = Arrays.asList(addresses.split(";"));
+        OutputFiles outputFiles=new OutputFiles(outPath);
         Integer min = Integer.valueOf(minString);
 
         outputFiles.timeStampFile("Inicio de la lectura del archivo",2);
-        List<Tree> trees = CSVParser.readTrees(inPath, city);
+        CSVParser parser = new CSVParser();
+        List<Tree> trees = parser.readTrees(inPath, city);
         outputFiles.timeStampFile("Fin de la lectura del archivo",2);
 
         HazelCast hz = new HazelCast(addressesList);
