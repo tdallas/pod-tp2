@@ -68,22 +68,14 @@ public class TreesPerPopulation {
         }
         outputFiles.timeStampFile("Fin del trabajo de map/reduce",1);
 
-        Map<String, Double> calculated_result = new LinkedHashMap<>();
         assert result != null;
-        for (Map.Entry<String, Long> entry : result.entrySet()) {
-            Double population = neighbourhoods.get(entry.getKey()).getPopulation().doubleValue();
-            calculated_result.put(entry.getKey(), entry.getValue()/population);
-        }
-
-        Stream<Map.Entry<String, Double>> sorted_result = calculated_result.entrySet().stream()
-                                                        .sorted(Comparator.comparingDouble(Map.Entry<String, Double>::getValue).reversed()
-                                                                          .thenComparing(Map.Entry::getKey));
+        Stream<Map.Entry<String, Double>> sorted_result=filterResult(result,neighbourhoods);
 
         outputFiles.treesPerPopulationWritter(sorted_result);
 
     }
 
-    private static Map<String, Long> query(HazelCast hz, IList<String> neighbourhoodsWithTrees) throws ExecutionException, InterruptedException {
+    public static Map<String, Long> query(HazelCast hz, IList<String> neighbourhoodsWithTrees) throws ExecutionException, InterruptedException {
 
         JobTracker jobTracker = hz.getJobTracker("g9treesPerPop");
         final KeyValueSource<String,String> source = KeyValueSource.fromList(neighbourhoodsWithTrees);
@@ -96,5 +88,19 @@ public class TreesPerPopulation {
                 .submit();
 
         return future.get();
+    }
+
+    public static Stream<Map.Entry<String, Double>> filterResult(Map<String, Long> result, Map<String, Neighbourhood> neighbourhoods){
+        Map<String, Double> calculated_result = new LinkedHashMap<>();
+
+        for (Map.Entry<String, Long> entry : result.entrySet()) {
+            Double population = neighbourhoods.get(entry.getKey()).getPopulation().doubleValue();
+            calculated_result.put(entry.getKey(), entry.getValue()/population);
+        }
+
+        return calculated_result.entrySet().stream()
+                .sorted(Comparator.comparingDouble(Map.Entry<String, Double>::getValue).reversed()
+                        .thenComparing(Map.Entry::getKey));
+
     }
 }

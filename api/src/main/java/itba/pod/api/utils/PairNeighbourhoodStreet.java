@@ -1,8 +1,13 @@
 package itba.pod.api.utils;
 
+import com.hazelcast.nio.ObjectDataInput;
+import com.hazelcast.nio.ObjectDataOutput;
+import com.hazelcast.nio.serialization.DataSerializable;
+
+import java.io.IOException;
 import java.util.Objects;
 
-public class PairNeighbourhoodStreet implements Comparable<PairNeighbourhoodStreet> {
+public class PairNeighbourhoodStreet implements Comparable<PairNeighbourhoodStreet>, DataSerializable {
     private String street;
     private String neighbourhood;
 
@@ -49,5 +54,17 @@ public class PairNeighbourhoodStreet implements Comparable<PairNeighbourhoodStre
 
     public PairNeighbourhoodStreet clone() {
         return new PairNeighbourhoodStreet(new String(street), new String(neighbourhood));
+    }
+
+    @Override
+    public void writeData(ObjectDataOutput objectDataOutput) throws IOException {
+        objectDataOutput.writeUTF(this.neighbourhood);
+        objectDataOutput.writeUTF(this.street);
+    }
+
+    @Override
+    public void readData(ObjectDataInput objectDataInput) throws IOException {
+        this.neighbourhood=objectDataInput.readUTF();
+        this.street=objectDataInput.readUTF();
     }
 }

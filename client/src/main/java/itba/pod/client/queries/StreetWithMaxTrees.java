@@ -45,8 +45,8 @@ public class StreetWithMaxTrees {
         outputFiles.timeStampFile("Fin de la lectura del archivo",2);
 
         HazelCast hz = new HazelCast(addressesList);
-
         IList<PairNeighbourhoodStreet> streetAndNeighbourhood = hz.getList("g9dataSource");
+
         assert trees != null;
         trees.forEach(t -> {
             streetAndNeighbourhood.add(new PairNeighbourhoodStreet(t.getStreet(), t.getNeighbourhood()));
@@ -62,6 +62,13 @@ public class StreetWithMaxTrees {
         }
         outputFiles.timeStampFile("Fin del trabajo de map/reduce",2);
 
+        assert result != null;
+        Map<PairNeighbourhoodStreet,Long> filtered_result=filtered_result(result);
+
+        outputFiles.StreetWithMaxTreesWritter(filtered_result);
+    }
+
+    public static Map<PairNeighbourhoodStreet,Long> filtered_result(List<Map.Entry<PairNeighbourhoodStreet, Long>> result){
         Map<PairNeighbourhoodStreet, Long> filtered_result = new HashMap<>();
         PairNeighbourhoodStreet pairPrev = null;
         PairNeighbourhoodStreet pairMax = null;
@@ -82,11 +89,9 @@ public class StreetWithMaxTrees {
             }
             pairPrev = pairCurr.clone();
         }
-
-        outputFiles.StreetWithMaxTreesWritter(filtered_result);
+        return filtered_result;
     }
-
-    private static List<Map.Entry<PairNeighbourhoodStreet, Long>> query(HazelCast hz, IList<PairNeighbourhoodStreet> streetAndNeighbourhood, Integer min) throws ExecutionException, InterruptedException {
+    public static List<Map.Entry<PairNeighbourhoodStreet, Long>> query(HazelCast hz, IList<PairNeighbourhoodStreet> streetAndNeighbourhood, Integer min) throws ExecutionException, InterruptedException {
 
         JobTracker jobTracker = hz.getJobTracker("g9streetMaxTrees");
         final KeyValueSource<String, PairNeighbourhoodStreet> source = KeyValueSource.fromList(streetAndNeighbourhood);

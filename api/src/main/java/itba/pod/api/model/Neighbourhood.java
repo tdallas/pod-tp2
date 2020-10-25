@@ -1,8 +1,18 @@
 package itba.pod.api.model;
 
-public class Neighbourhood implements CSVEntry {
+import com.hazelcast.nio.ObjectDataInput;
+import com.hazelcast.nio.ObjectDataOutput;
+import com.hazelcast.nio.serialization.DataSerializable;
 
-    // Neighbourhood fields (standard name)
+   
+import java.io.IOException;
+import java.util.Objects;
+
+public class Neighbourhood implements CSVEntry, DataSerializable {
+
+ 
+    
+     // Neighbourhood fields (standard name)
     public static final String NAME = "NAME";
     public static final String POPULATION = "POPULATION";
 
@@ -25,5 +35,31 @@ public class Neighbourhood implements CSVEntry {
     @Override
     public String toString() {
         return String.join(", ", name, population.toString());
+    }
+
+    @Override
+    public void writeData(ObjectDataOutput objectDataOutput) throws IOException {
+        objectDataOutput.writeUTF(this.name);
+        objectDataOutput.writeInt(this.population);
+    }
+
+    @Override
+    public void readData(ObjectDataInput objectDataInput) throws IOException {
+        this.name= objectDataInput.readUTF();
+        this.population=objectDataInput.readInt();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Neighbourhood that = (Neighbourhood) o;
+        return Objects.equals(name, that.name) &&
+                Objects.equals(population, that.population);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, population);
     }
 }
