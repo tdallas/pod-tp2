@@ -155,7 +155,7 @@ public class CSVParser {
         String scientificName = row[indexes.get(Tree.SCIENTIFIC_NAME)];
         String diameterString = row[indexes.get(Tree.DIAMETER)];
 
-        if (neighbourhood.isEmpty() || street.isEmpty() || scientificName.isEmpty() || diameterString.isEmpty())
+        if (neighbourhood.isEmpty() || street.isEmpty() || scientificName.isEmpty() || diameterString.isEmpty() || Double.parseDouble(diameterString) <= 0)
             return Optional.empty();
 
         return Optional.of(new Tree(neighbourhood, street, scientificName, Double.parseDouble(diameterString)));
@@ -165,9 +165,9 @@ public class CSVParser {
         String name = row[indexes.get(Neighbourhood.NAME)];
         String populationString = row[indexes.get(Neighbourhood.POPULATION)];
 
-        if (name.isEmpty() || populationString.isEmpty())
+        if (name.isEmpty() || populationString.isEmpty() || Long.parseLong(populationString) <= 0)
             return Optional.empty();
 
-        return Optional.of(new Neighbourhood(name, Integer.parseInt(populationString)));
+        return Optional.of(new Neighbourhood(name, Long.parseLong(populationString)));
     }
 }

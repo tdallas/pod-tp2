@@ -38,10 +38,10 @@ public class TreesPerCapitaTest {
         expected.put("11",0.33);
         expected.put("12",0.33);
 
-        neighbourhoods.put("9",new Neighbourhood("9",4));
-        neighbourhoods.put("11",new Neighbourhood("11",3));
-        neighbourhoods.put("12",new Neighbourhood("12",3));
-        neighbourhoods.put("10",new Neighbourhood("10",10));
+        neighbourhoods.put("9",new Neighbourhood("9",4L));
+        neighbourhoods.put("11",new Neighbourhood("11",3L));
+        neighbourhoods.put("12",new Neighbourhood("12",3L));
+        neighbourhoods.put("10",new Neighbourhood("10",10L));
 
         trees.add("12");
         trees.add("10");trees.add("10");trees.add("10");trees.add("10");trees.add("10");

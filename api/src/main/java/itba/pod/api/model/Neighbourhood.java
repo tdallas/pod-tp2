@@ -16,9 +16,9 @@ public class Neighbourhood implements CSVEntry, DataSerializable {
     public static final String POPULATION = "POPULATION";
 
     private String name;
-    private Integer population;
+    private Long population;
 
-    public Neighbourhood(String name, Integer population) {
+    public Neighbourhood(String name, Long population) {
         this.name = name;
         this.population = population;
     }
@@ -27,7 +27,7 @@ public class Neighbourhood implements CSVEntry, DataSerializable {
         return name;
     }
 
-    public Integer getPopulation() {
+    public Long getPopulation() {
         return population;
     }
 
@@ -39,13 +39,13 @@ public class Neighbourhood implements CSVEntry, DataSerializable {
     @Override
     public void writeData(ObjectDataOutput objectDataOutput) throws IOException {
         objectDataOutput.writeUTF(this.name);
-        objectDataOutput.writeInt(this.population);
+        objectDataOutput.writeLong(this.population);
     }
 
     @Override
     public void readData(ObjectDataInput objectDataInput) throws IOException {
         this.name = objectDataInput.readUTF();
-        this.population = objectDataInput.readInt();
+        this.population = objectDataInput.readLong();
     }
 
     @Override
