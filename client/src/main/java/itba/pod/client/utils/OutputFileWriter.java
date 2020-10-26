@@ -79,7 +79,7 @@ public class OutputFileWriter {
     }
 
     public void writeNeighbourhoodPairsWithMinTrees(List<Map.Entry<String, String>> results) {
-        sb.append("Barrio A;Barrio B");
+        sb.append("Barrio A;Barrio B\n");
         results.forEach(e -> sb
                 .append(e.getKey()).append(DELIMITER)
                 .append(e.getValue())

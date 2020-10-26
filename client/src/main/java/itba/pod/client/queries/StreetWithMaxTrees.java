@@ -17,6 +17,7 @@ import itba.pod.client.utils.ArgumentValidator;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 
 public class StreetWithMaxTrees extends Query {
     private static final int QUERY_2 = 2;
@@ -73,7 +74,11 @@ public class StreetWithMaxTrees extends Query {
             filteredResult.put(maxPair, count);
         }
 
-        return filteredResult;
+        return filteredResult.entrySet().stream()
+                        .sorted(Map.Entry.comparingByKey())
+                        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
+                                (oldValue, newValue) -> oldValue, LinkedHashMap::new));
+
     }
 
     public List<Map.Entry<PairNeighbourhoodStreet, Long>> mapReduce(IList<PairNeighbourhoodStreet> streetAndNeighbourhood,
