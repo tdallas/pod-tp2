@@ -13,61 +13,41 @@ import itba.pod.api.reducers.CounterReducerFactory;
 import itba.pod.api.utils.PairNeighbourhoodStreet;
 import itba.pod.client.exceptions.InvalidArgumentException;
 import itba.pod.client.utils.ArgumentValidator;
-import itba.pod.client.utils.CSVParser;
-import itba.pod.client.utils.HazelCast;
-import itba.pod.client.utils.OutputFiles;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 
-public class StreetWithMaxTrees {
-    private static Logger logger = LoggerFactory.getLogger(TreesPerCapita.class);
+public class StreetWithMaxTrees extends Query {
+    private static final int QUERY_2 = 2;
+    private Integer minTrees;
 
     public static void main(String[] args) throws InvalidArgumentException, IOException {
-        String addresses = System.getProperty("addresses");
-        String city = System.getProperty("city");
-        String inPath = System.getProperty("inPath");
-        String outPath = System.getProperty("outPath");
-        String minString = System.getProperty("min");
+        new StreetWithMaxTrees().query();
+    }
 
-        ArgumentValidator.validate(addresses, city, inPath, outPath, minString);
-        List<String> addressesList = Arrays.asList(addresses.split(";"));
-        OutputFiles outputFiles = new OutputFiles(outPath);
-        Integer min = Integer.valueOf(minString);
+    public void query() throws InvalidArgumentException, IOException {
+        setup(QUERY_2);
+        readAdditionalArguments();
 
-        outputFiles.timeStampFile("Inicio de la lectura del archivo", 2);
-        CSVParser parser = new CSVParser();
-        List<Tree> trees = parser.readTrees(inPath, city);
-        outputFiles.timeStampFile("Fin de la lectura del archivo", 2);
-
-        HazelCast hz = new HazelCast(addressesList);
+        List<Tree> trees = readTrees();
         IList<PairNeighbourhoodStreet> streetAndNeighbourhood = hz.getList("g9dataSource");
+        trees.forEach(t -> streetAndNeighbourhood.add(new PairNeighbourhoodStreet(t.getStreet(), t.getNeighbourhood())));
 
-        assert trees != null;
-        trees.forEach(t -> {
-            streetAndNeighbourhood.add(new PairNeighbourhoodStreet(t.getStreet(), t.getNeighbourhood()));
-        });
-
-        outputFiles.timeStampFile("Inicio del trabajo de map/reduce", 2);
-        List<Map.Entry<PairNeighbourhoodStreet, Long>> result = null;
+        fileWriter.timestampBeginMapReduce();
+        List<Map.Entry<PairNeighbourhoodStreet, Long>> result = List.of();
         try {
-            result = StreetWithMaxTrees.query(hz, streetAndNeighbourhood, min);
-
+            result = mapReduce(streetAndNeighbourhood, this.minTrees);
         } catch (Exception e) {
             // TODO manejar excepcion
         }
-        outputFiles.timeStampFile("Fin del trabajo de map/reduce", 2);
+        fileWriter.timestampEndMapReduce();
 
-        assert result != null;
-        Map<PairNeighbourhoodStreet, Long> filtered_result = filtered_result(result);
-
-        outputFiles.writeStreetWithMaxTrees(filtered_result);
+        Map<PairNeighbourhoodStreet, Long> filteredResult = filteredResult(result);
+        fileWriter.writeStreetWithMaxTrees(filteredResult);
     }
 
-    public static Map<PairNeighbourhoodStreet, Long> filtered_result(List<Map.Entry<PairNeighbourhoodStreet, Long>> result) {
+    public Map<PairNeighbourhoodStreet, Long> filteredResult(List<Map.Entry<PairNeighbourhoodStreet, Long>> result) {
         Map<PairNeighbourhoodStreet, Long> filtered_result = new HashMap<>();
         PairNeighbourhoodStreet pairPrev = null;
         PairNeighbourhoodStreet pairMax = null;
@@ -96,8 +76,9 @@ public class StreetWithMaxTrees {
         return filtered_result;
     }
 
-    public static List<Map.Entry<PairNeighbourhoodStreet, Long>> query(HazelCast hz, IList<PairNeighbourhoodStreet> streetAndNeighbourhood, Integer min) throws ExecutionException, InterruptedException {
-
+    public List<Map.Entry<PairNeighbourhoodStreet, Long>> mapReduce(IList<PairNeighbourhoodStreet> streetAndNeighbourhood,
+                                                                    Integer minTrees)
+            throws ExecutionException, InterruptedException {
         JobTracker jobTracker = hz.getJobTracker("g9streetMaxTrees");
         final KeyValueSource<String, PairNeighbourhoodStreet> source = KeyValueSource.fromList(streetAndNeighbourhood);
         Job<String, PairNeighbourhoodStreet> job = jobTracker.newJob(source);
@@ -106,8 +87,19 @@ public class StreetWithMaxTrees {
                 .mapper(new CounterMapper<>())
                 .combiner(new CounterCombinerFactory<>())
                 .reducer(new CounterReducerFactory<>())
-                .submit(new BiggerThanCollator<>(min));
+                .submit(new BiggerThanCollator<>(minTrees));
 
         return future.get();
+    }
+
+    private void readAdditionalArguments() throws InvalidArgumentException {
+        String minTreesString = System.getProperty("min");
+
+        ArgumentValidator.validateQuery2(minTreesString);
+        setMinTrees(Integer.valueOf(minTreesString));
+    }
+
+    public void setMinTrees(Integer minTrees) {
+        this.minTrees = minTrees;
     }
 }

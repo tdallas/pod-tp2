@@ -12,17 +12,15 @@ import java.util.concurrent.ExecutionException;
 
 
 public class TopSpeciesWithMaxDiamTest {
-    HazelCast hz;
-    IList<Tree> trees;
+    private IList<Tree> trees;
+    private final TopSpeciesWithMaxDiam query3 = new TopSpeciesWithMaxDiam();
 
     @Before
     public void createTrees() {
-        List<String> addresses = new LinkedList<>();
-
-        addresses.add("127.0.0.1");
-
-        hz = new HazelCast(addresses);
+        List<String> addresses = List.of("127.0.0.1");
+        HazelCast hz = new HazelCast(addresses);
         trees = hz.getList("g9topNSpecies");
+        query3.setHazelcast(hz);
     }
 
     @Test
@@ -36,7 +34,7 @@ public class TopSpeciesWithMaxDiamTest {
         trees.add(new Tree("", "", orderedNames.get(0), diameter));
         trees.add(new Tree("", "", orderedNames.get(2), diameter));
 
-        final List<Map.Entry<String, Double>> queryResult = TopSpeciesWithMaxDiam.query(hz, trees, trees.size());
+        final List<Map.Entry<String, Double>> queryResult = query3.mapReduce(trees, trees.size());
 
         assertArrayEquals(orderedNames.toArray(), queryResult.stream().map(Map.Entry::getKey).toArray());
     }
@@ -49,7 +47,7 @@ public class TopSpeciesWithMaxDiamTest {
         trees.add(new Tree("", "", "Jacarandá", orderedDiameters[1]));
         trees.add(new Tree("", "", "Abedul", orderedDiameters[2]));
 
-        final List<Map.Entry<String, Double>> queryResult = TopSpeciesWithMaxDiam.query(hz, trees, trees.size());
+        final List<Map.Entry<String, Double>> queryResult = query3.mapReduce(trees, trees.size());
 
         assertArrayEquals(orderedDiameters, queryResult.stream().map(Map.Entry::getValue).toArray());
     }
@@ -62,7 +60,7 @@ public class TopSpeciesWithMaxDiamTest {
 
         int N = trees.size() - 1;
 
-        final List<Map.Entry<String, Double>> queryResult = TopSpeciesWithMaxDiam.query(hz, trees, N);
+        final List<Map.Entry<String, Double>> queryResult = query3.mapReduce(trees, N);
         final var topNTrees = queryResult.stream()
                 .map(e -> new Tree("", "", e.getKey(), e.getValue()))
                 .toArray();

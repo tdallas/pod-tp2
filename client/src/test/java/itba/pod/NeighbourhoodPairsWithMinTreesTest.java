@@ -14,17 +14,15 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 public class NeighbourhoodPairsWithMinTreesTest {
-    HazelCast hz;
-    IList<Tree> trees;
+    private final NeighbourhoodPairsWithMinTrees query4 = new NeighbourhoodPairsWithMinTrees();
+    private IList<Tree> trees;
 
     @Before
     public void createTrees() {
-        List<String> addresses = new LinkedList<>();
-
-        addresses.add("127.0.0.1");
-
-        hz = new HazelCast(addresses);
+        List<String> addresses = List.of("127.0.0.1");
+        HazelCast hz = new HazelCast(addresses);
         trees = hz.getList("g9minTrees");
+        query4.setHazelcast(hz);
     }
 
     @Test
@@ -37,7 +35,7 @@ public class NeighbourhoodPairsWithMinTreesTest {
         treesPerNeighbourhood.add(Map.entry("C", 1L));
         treesPerNeighbourhood.add(Map.entry("D", 1L));
 
-        var pairs = NeighbourhoodPairsWithMinTrees.pairNeighbourhoods(treesPerNeighbourhood);
+        var pairs = query4.pairNeighbourhoods(treesPerNeighbourhood);
 
         List<Map.Entry<String, String>> expected = new LinkedList<>();
 
@@ -62,7 +60,7 @@ public class NeighbourhoodPairsWithMinTreesTest {
         trees.add(new Tree("Belgrano", "", SPECIES, 50.0));
         trees.add(new Tree("Palermo", "", SPECIES, 50.0));
 
-        var queryResult = NeighbourhoodPairsWithMinTrees.query(hz, trees, minTrees, SPECIES);
+        var queryResult = query4.mapReduce(trees, minTrees, SPECIES);
 
         List<Map.Entry<String, Long>> expected = new LinkedList<>();
 
@@ -84,7 +82,7 @@ public class NeighbourhoodPairsWithMinTreesTest {
         trees.add(new Tree("Belgrano", "", "Abedul", 50.0));
         trees.add(new Tree("Recoleta", "", "Abedul", 50.0));
 
-        var queryResult = NeighbourhoodPairsWithMinTrees.query(hz, trees, minTrees, SPECIES);
+        var queryResult = query4.mapReduce(trees, minTrees, SPECIES);
 
         List<Map.Entry<String, Long>> expected = new LinkedList<>();
 

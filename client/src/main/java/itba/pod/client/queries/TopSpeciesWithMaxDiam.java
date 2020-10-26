@@ -11,59 +11,41 @@ import itba.pod.api.model.Tree;
 import itba.pod.api.reducers.AvgReducerFactory;
 import itba.pod.client.exceptions.InvalidArgumentException;
 import itba.pod.client.utils.ArgumentValidator;
-import itba.pod.client.utils.CSVParser;
-import itba.pod.client.utils.HazelCast;
-import itba.pod.client.utils.OutputFiles;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
-public class TopSpeciesWithMaxDiam {
-    private static Logger logger = LoggerFactory.getLogger(TreesPerCapita.class);
+public class TopSpeciesWithMaxDiam extends Query {
+    private static final int QUERY_3 = 3;
+    private Integer n;
 
     public static void main(String[] args) throws InvalidArgumentException, IOException {
-        String addresses = System.getProperty("addresses");
-        String city = System.getProperty("city");
-        String inPath = System.getProperty("inPath");
-        String outPath = System.getProperty("outPath");
-        String nString = System.getProperty("n");
+        new TopSpeciesWithMaxDiam().query();
+    }
 
-        ArgumentValidator.validate(addresses, city, inPath, outPath, nString);
-        List<String> addressesList = Arrays.asList(addresses.split(";"));
-        OutputFiles outputFiles = new OutputFiles(outPath);
-        Integer n = Integer.valueOf(nString);
+    public void query() throws InvalidArgumentException, IOException {
+        setup(QUERY_3);
+        readAdditionalArguments();
 
-        HazelCast hz = new HazelCast(addressesList);
+        IList<Tree> trees = super.hz.getList("g9dataSource");
+        trees.addAll(readTrees());
 
-        IList<Tree> trees = hz.getList("g9dataSource");
-
-        outputFiles.timeStampFile("Inicio de la lectura del archivo",3);
-        CSVParser parser = new CSVParser();
-        trees.addAll(parser.readTrees(inPath, city));
-        outputFiles.timeStampFile("Fin de la lectura del archivo",3);
-
-        outputFiles.timeStampFile("Inicio del trabajo de map/reduce",3);
         List<Map.Entry<String, Double>> result = List.of();
-
+        super.fileWriter.timestampBeginMapReduce();
         try {
-            result = TopSpeciesWithMaxDiam.query(hz, trees, n);
+            result = mapReduce(trees, this.n);
         } catch (Exception e) {
             // TODO manejar excepcion
         }
-        outputFiles.timeStampFile("Fin del trabajo de map/reduce",3);
-
-        outputFiles.writeTopSpeciesWithMaxDiam(result);
+        super.fileWriter.timestampEndMapReduce();
+        super.fileWriter.writeTopSpeciesWithMaxDiam(result);
     }
 
-    public static List<Map.Entry<String, Double>> query(final HazelCast hz,
-                                                    final IList<Tree> trees,
-                                                    final Integer n) throws ExecutionException, InterruptedException {
-        final JobTracker jobTracker = hz.getJobTracker("g9topNSpecies");
+    public List<Map.Entry<String, Double>> mapReduce(final IList<Tree> trees, final Integer n)
+            throws ExecutionException, InterruptedException {
+        final JobTracker jobTracker = super.hz.getJobTracker("g9topNSpecies");
         final KeyValueSource<String, Tree> source = KeyValueSource.fromList(trees);
         final Job<String, Tree> job = jobTracker.newJob(source);
 
@@ -73,5 +55,16 @@ public class TopSpeciesWithMaxDiam {
                 .submit(new TopNCollator(n));
 
         return future.get();
+    }
+
+    private void readAdditionalArguments() throws InvalidArgumentException {
+        String nString = System.getProperty("n");
+
+        ArgumentValidator.validateQuery3(nString);
+        setN(Integer.valueOf(nString));
+    }
+
+    public void setN(Integer n) {
+        this.n = n;
     }
 }

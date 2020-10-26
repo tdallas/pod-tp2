@@ -3,6 +3,7 @@ package itba.pod.client.utils;
 import itba.pod.api.utils.PairNeighbourhoodStreet;
 import itba.pod.api.utils.SortedPair;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -11,26 +12,36 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-public class OutputFiles {
+public class OutputFileWriter {
     String outputFilePath;
     private final StringBuilder sb = new StringBuilder();
     private final String DELIMITER = ";";
+    private final int queryNumber;
 
-    public OutputFiles(String outputFilePath) {
+    public OutputFileWriter(String outputFilePath, final int queryNumber) {
         this.outputFilePath = outputFilePath;
+        this.queryNumber = queryNumber;
     }
 
-    public void timeStampFile(String work, int queryN) {
+    public void timeStampFile(String work) {
+        // TODO: Get rid of this link
 //        https://mkyong.com/java8/java-8-how-to-format-localdatetime/
-        try (FileWriter fw = new FileWriter(outputFilePath + "query" + queryN + ".txt", true)) {
+        try (FileWriter fw = new FileWriter(outputFilePath + "query" + queryNumber + ".txt", true)) {
             StringBuilder sb = new StringBuilder();
             LocalDateTime now = LocalDateTime.now();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-mm-yyyy hh:mm:ss:xxxx");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/mm/yyyy hh:mm:ss:SSSS");
             String formatDateTime = now.format(formatter);
-            sb.append(formatDateTime).append("INFO Client - ").append(work).append("\n");
+            sb.append(formatDateTime).append("  INFO Client - ").append(work).append("\n");
             fw.write(sb.toString());
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void addDirectory() {
+        File directory = new File(outputFilePath);
+        if (!directory.exists()) {
+            directory.mkdirs();
         }
     }
 
@@ -87,5 +98,21 @@ public class OutputFiles {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void timestampBeginFileRead() {
+        timeStampFile("Inicio de la lectura del archivo");
+    }
+
+    public void timestampEndFileRead() {
+        timeStampFile("Fin de la lectura del archivo");
+    }
+
+    public void timestampBeginMapReduce() {
+        timeStampFile("Inicio del trabajo de map/reduce");
+    }
+
+    public void timestampEndMapReduce() {
+        timeStampFile("Fin del trabajo de map/reduce");
     }
 }

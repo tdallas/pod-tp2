@@ -15,7 +15,7 @@ import java.util.Map;
 
 public class CSVParserTest {
     private static final CSVParser parser = new CSVParser();
-    private GetPropertyValues properties = new GetPropertyValues();
+    private final GetPropertyValues properties = new GetPropertyValues();
     private static final String resourcesPath = "src/test/resources/";
 
     @Test

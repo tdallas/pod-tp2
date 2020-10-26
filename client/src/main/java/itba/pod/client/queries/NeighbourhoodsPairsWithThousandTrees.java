@@ -6,73 +6,51 @@ import com.hazelcast.mapreduce.Job;
 import com.hazelcast.mapreduce.JobTracker;
 import com.hazelcast.mapreduce.KeyValueSource;
 import itba.pod.api.combiners.CounterCombinerFactory;
-import itba.pod.api.mappers.CounterMapper;
+import itba.pod.api.mappers.NeighbourhoodCountMapper;
 import itba.pod.api.model.Tree;
 import itba.pod.api.reducers.ThousandReducerFactory;
 import itba.pod.api.utils.SortedPair;
 import itba.pod.client.exceptions.InvalidArgumentException;
-import itba.pod.client.utils.ArgumentValidator;
-import itba.pod.client.utils.CSVParser;
-import itba.pod.client.utils.HazelCast;
-import itba.pod.client.utils.OutputFiles;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
-public class NeighbourhoodsPairsWithThousandTrees {
-
-    private static Logger logger = LoggerFactory.getLogger(NeighbourhoodsPairsWithThousandTrees.class);
+public class NeighbourhoodsPairsWithThousandTrees extends Query {
+    private static final int QUERY_5 = 5;
 
     public static void main(String[] args) throws InvalidArgumentException, IOException {
-        String addresses = System.getProperty("addresses");
-        String city = System.getProperty("city");
-        String inPath = System.getProperty("inPath");
-        String outPath = System.getProperty("outPath");
+        new NeighbourhoodsPairsWithThousandTrees().query();
+    }
 
-        ArgumentValidator.validate(addresses, city, inPath, outPath);
-        List<String> addressesList = Arrays.asList(addresses.split(";"));
-        OutputFiles outputFiles=new OutputFiles(outPath);
+    public void query() throws InvalidArgumentException, IOException {
+        setup(QUERY_5);
 
-        outputFiles.timeStampFile("Inicio de la lectura del archivo",1);
-        CSVParser parser = new CSVParser();
-        List<Tree> trees = parser.readTrees(inPath, city);
-        outputFiles.timeStampFile("Fin de la lectura del archivo",1);
+        IList<Tree> trees = hz.getList("g9dataSource");
+        trees.addAll(readTrees());
 
-        HazelCast hz = new HazelCast(addressesList);
-
-        IList<String> neighbourhoodsWithTrees = hz.getList("g9dataSource");
-        trees.forEach(t->{
-            neighbourhoodsWithTrees.add(t.getNeighbourhood());
-        });
-
-        outputFiles.timeStampFile("Inicio del trabajo de map/reduce",1);
-
-        Map<String, Long> result = null;
+        fileWriter.timestampBeginMapReduce();
+        Map<String, Long> result = Map.of();
         try {
-            result = NeighbourhoodsPairsWithThousandTrees.query(hz, neighbourhoodsWithTrees);
+            result = mapReduce(trees);
         } catch (Exception e) {
             // TODO manejar excepcion
         }
-        outputFiles.timeStampFile("Fin del trabajo de map/reduce",1);
+        fileWriter.timestampEndMapReduce();
 
-        List<Map.Entry<Long, SortedPair<String>>> paired_result = pairResult(result);
-
-        outputFiles.writeNeighbourhoodPairsWithThousandTrees(paired_result);
+        List<Map.Entry<Long, SortedPair<String>>> pairedResult = pairResult(result);
+        fileWriter.writeNeighbourhoodPairsWithThousandTrees(pairedResult);
     }
 
-    public static Map<String, Long> query(HazelCast hz, IList<String> neighbourhoodsWithTrees)
-            throws ExecutionException, InterruptedException {
-
+    private Map<String, Long> mapReduce(IList<Tree> trees) throws ExecutionException, InterruptedException {
         JobTracker jobTracker = hz.getJobTracker("g9neighbourhoodsPairs");
-        final KeyValueSource<String,String> source = KeyValueSource.fromList(neighbourhoodsWithTrees);
-        Job<String,String> job = jobTracker.newJob(source);
+        final KeyValueSource<String, Tree> source = KeyValueSource.fromList(trees);
+        Job<String, Tree> job = jobTracker.newJob(source);
 
         ICompletableFuture<Map<String, Long>> future = job
-                .mapper(new CounterMapper<>())
+                .mapper(new NeighbourhoodCountMapper())
                 .combiner(new CounterCombinerFactory<>())
                 .reducer(new ThousandReducerFactory())
                 .submit();
@@ -80,7 +58,7 @@ public class NeighbourhoodsPairsWithThousandTrees {
         return future.get();
     }
 
-    public static List<Map.Entry<Long, SortedPair<String>>> pairResult(Map<String, Long> result) {
+    private List<Map.Entry<Long, SortedPair<String>>> pairResult(Map<String, Long> result) {
         List<Map.Entry<String, Long>> sorted_result = result.entrySet().stream()
                                                             .filter(e -> e.getValue() >= 1000)
                                                             .sorted(Comparator

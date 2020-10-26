@@ -8,7 +8,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
@@ -16,21 +15,19 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
+
 
 public class TreesPerCapitaTest {
-    private HazelCast hz;
+    private final TreesPerCapita query1 = new TreesPerCapita();
     private IList<String> trees;
-    private Map<String, Neighbourhood> neighbourhoods = new LinkedHashMap<>();
+    private final Map<String, Neighbourhood> neighbourhoods = new LinkedHashMap<>();
 
     @Before
     public void createTrees() {
-        List<String> addresses = new LinkedList<>();
-
-        addresses.add("127.0.0.1");
-
-        hz = new HazelCast(addresses);
+        List<String> addresses = List.of("127.0.0.1");
+        HazelCast hz = new HazelCast(addresses);
         trees = hz.getList("g9treesPerPop");
+        query1.setHazelcast(hz);
     }
 
     @Test
@@ -38,8 +35,8 @@ public class TreesPerCapitaTest {
         Map<String, Double> expected = new LinkedHashMap<>();
         expected.put("9",0.75);
         expected.put("10",0.50);
-        expected.put("11",1/(double)3);
-        expected.put("12",1/(double)3);
+        expected.put("11",0.33);
+        expected.put("12",0.33);
 
         neighbourhoods.put("9",new Neighbourhood("9",4));
         neighbourhoods.put("11",new Neighbourhood("11",3));
@@ -51,16 +48,15 @@ public class TreesPerCapitaTest {
         trees.add("9");trees.add("9");trees.add("9");
         trees.add("11");
 
-        Map<String, Long> query=TreesPerCapita.query(hz,trees);
-        Stream<Map.Entry<String, Double>> sorted_result= TreesPerCapita.filterResult(query,neighbourhoods);
+        Map<String, Long> query = query1.mapReduce(trees);
+        Stream<Map.Entry<String, Double>> sortedResult = query1.filterResult(query, neighbourhoods);
 
         LinkedHashMap<String,Double> map =
-                sorted_result.collect(Collectors.toMap(Map.Entry::getKey,
+                sortedResult.collect(Collectors.toMap(Map.Entry::getKey,
                         Map.Entry::getValue,
                         (v1,v2)->v1,
                         LinkedHashMap::new));
 
         assertEquals(expected, map);
-
     }
 }

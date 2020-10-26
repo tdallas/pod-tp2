@@ -18,26 +18,23 @@ import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertTrue;
 
 public class StreetWithMaxTreesTest {
-    HazelCast hz;
-    IList<PairNeighbourhoodStreet> streetAndNeighbourhood;
+    private final StreetWithMaxTrees query2 = new StreetWithMaxTrees();
+    private IList<PairNeighbourhoodStreet> streetAndNeighbourhood;
 
     @Before
     public void createTrees() {
-        List<String> addresses = new LinkedList<>();
-
-        addresses.add("127.0.0.1");
-
-        hz = new HazelCast(addresses);
+        List<String> addresses = List.of("127.0.0.1");
+        HazelCast hz = new HazelCast(addresses);
         streetAndNeighbourhood = hz.getList("g9streetMaxTrees");
+        query2.setHazelcast(hz);
     }
 
     @Test
     public void StreetMaxTrees() throws ExecutionException, InterruptedException {
-        Map<PairNeighbourhoodStreet,Long> expected=new LinkedHashMap<>();
+        Map<PairNeighbourhoodStreet,Long> expected = new LinkedHashMap<>();
         expected.put(new PairNeighbourhoodStreet("ABC","11"),3L);
         expected.put(new PairNeighbourhoodStreet("ABC","12"),3L);
 
-
         streetAndNeighbourhood.add(new PairNeighbourhoodStreet("ABC","12"));
         streetAndNeighbourhood.add(new PairNeighbourhoodStreet("ABC","12"));
         streetAndNeighbourhood.add(new PairNeighbourhoodStreet("DEF","11"));
@@ -47,16 +44,10 @@ public class StreetWithMaxTreesTest {
         streetAndNeighbourhood.add(new PairNeighbourhoodStreet("ABC","11"));
         streetAndNeighbourhood.add(new PairNeighbourhoodStreet("ABC","11"));
 
-        List<Map.Entry<PairNeighbourhoodStreet, Long>> result =StreetWithMaxTrees.query(hz, streetAndNeighbourhood, 1);
-        Map<PairNeighbourhoodStreet,Long> filtered_result=StreetWithMaxTrees.filtered_result(result);
+        List<Map.Entry<PairNeighbourhoodStreet, Long>> result = query2.mapReduce(streetAndNeighbourhood, 1);
+        Map<PairNeighbourhoodStreet,Long> filteredResult = query2.filteredResult(result);
 
-        assertEquals(expected.size(),filtered_result.size());
-        assertEquals(expected, filtered_result);
-
-
-
-
-
-
+        assertEquals(expected.size(),filteredResult.size());
+        assertEquals(expected, filteredResult);
    }
 }
