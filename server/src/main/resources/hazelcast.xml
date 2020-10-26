@@ -31,12 +31,13 @@
         <join>
             <multicast enabled="false"/>
             <tcp-ip enabled="true">
-                <member>localhost</member>
+                <member>192.168.100.3</member>
+                <member>172.17.0.4</member>
             </tcp-ip>
         </join>
-<!--        THIS IS COMMENTED BECAUSE IS NOT WORKING-->
         <interfaces enabled="true">
-            <interface>127.0.0.1</interface>
+            <interface>192.168.100.3</interface>
+            <interface>172.17.0.4</interface>
         </interfaces>
         <ssl enabled="false"/>
         <socket-interceptor enabled="false"/>
