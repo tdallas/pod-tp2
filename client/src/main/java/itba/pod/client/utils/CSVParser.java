@@ -6,7 +6,6 @@ import itba.pod.api.model.Tree;
 
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -20,7 +19,7 @@ public class CSVParser {
 
     private static final String DELIMITER = ";";
 
-    private GetPropertyValues properties;
+    private final GetPropertyValues properties;
 
     public CSVParser() {
          properties = new GetPropertyValues();
@@ -107,20 +106,16 @@ public class CSVParser {
         final String[] header = br.readLine().split(DELIMITER);
         Map<String, Integer> indexes = getIndexesFromFields(header, fieldsMap);
 
-        return getDataFromCSV(br, indexes, header.length, dataName);
+        return getDataFromCSV(br, indexes, dataName);
     }
 
-    private List<CSVEntry> getDataFromCSV(BufferedReader br, final Map<String, Integer> indexes,
-                                          final Integer columns, final String dataName)
+    private List<CSVEntry> getDataFromCSV(BufferedReader br, final Map<String, Integer> indexes, final String dataName)
             throws IOException, IllegalArgumentException {
         List<CSVEntry> csvEntryList = new LinkedList<>();
         String line;
 
         while ((line = br.readLine()) != null) {
             final String[] row = line.split(DELIMITER);
-
-            if (row.length < columns)
-                continue;
 
             // TODO: Refactor this so that the if-else comparison inside the function isn't checked in every iteration
             Optional<CSVEntry> entry = buildEntry(row, indexes, dataName);

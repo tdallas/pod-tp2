@@ -33,10 +33,10 @@ public class NeighbourhoodPairsWithMinTrees extends Query {
         setup(QUERY_4);
         readAdditionalArguments();
 
-        IList<Tree> trees = hz.getList("g9dataSource");
+        IList<Tree> trees = super.hz.getList("g9dataSource");
         trees.addAll(readTrees());
 
-        fileWriter.timestampBeginMapReduce();
+        super.fileWriter.timestampBeginMapReduce();
         List<Map.Entry<String, Long>> result = List.of();
         try {
             result = mapReduce(trees, this.minTrees, this.species);
@@ -47,10 +47,10 @@ public class NeighbourhoodPairsWithMinTrees extends Query {
         } catch (Exception e) {
             // TODO manejar excepcion
         }
-        fileWriter.timestampEndMapReduce();
+        super.fileWriter.timestampEndMapReduce();
 
         List<Map.Entry<String, String>> neighbourhoodPairs = pairNeighbourhoods(result);
-        fileWriter.writeNeighbourhoodPairsWithMinTrees(neighbourhoodPairs);
+        super.fileWriter.writeNeighbourhoodPairsWithMinTrees(neighbourhoodPairs);
     }
 
     public List<Map.Entry<String, Long>> mapReduce(final IList<Tree> trees, Integer minTrees, String species)
@@ -63,7 +63,7 @@ public class NeighbourhoodPairsWithMinTrees extends Query {
                 .mapper(new NeighbourhoodCountMapper(species))
                 .combiner(new CounterCombinerFactory<>())
                 .reducer(new CounterReducerFactory<>())
-                .submit(new BiggerThanCollator<>(minTrees - 1));
+                .submit(new BiggerThanCollator<>(minTrees - 1));    // The collator's minimum is not inclusive
 
         return future.get();
     }

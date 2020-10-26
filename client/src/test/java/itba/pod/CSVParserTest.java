@@ -35,6 +35,7 @@ public class CSVParserTest {
             for (CSVEntry csvEntry : csvEntryList) {
                 System.out.println(csvEntry.toString());
             }
+            System.out.println(csvEntryList.size() + " entries read");
         } catch (IOException e) {
             e.printStackTrace();
         }

@@ -31,49 +31,49 @@ public class StreetWithMaxTrees extends Query {
         readAdditionalArguments();
 
         List<Tree> trees = readTrees();
-        IList<PairNeighbourhoodStreet> streetAndNeighbourhood = hz.getList("g9dataSource");
+        IList<PairNeighbourhoodStreet> streetAndNeighbourhood = super.hz.getList("g9dataSource");
         trees.forEach(t -> streetAndNeighbourhood.add(new PairNeighbourhoodStreet(t.getStreet(), t.getNeighbourhood())));
 
-        fileWriter.timestampBeginMapReduce();
         List<Map.Entry<PairNeighbourhoodStreet, Long>> result = List.of();
+        super.fileWriter.timestampBeginMapReduce();
         try {
             result = mapReduce(streetAndNeighbourhood, this.minTrees);
         } catch (Exception e) {
             // TODO manejar excepcion
         }
-        fileWriter.timestampEndMapReduce();
+        super.fileWriter.timestampEndMapReduce();
 
         Map<PairNeighbourhoodStreet, Long> filteredResult = filteredResult(result);
-        fileWriter.writeStreetWithMaxTrees(filteredResult);
+        super.fileWriter.writeStreetWithMaxTrees(filteredResult);
     }
 
     public Map<PairNeighbourhoodStreet, Long> filteredResult(List<Map.Entry<PairNeighbourhoodStreet, Long>> result) {
-        Map<PairNeighbourhoodStreet, Long> filtered_result = new HashMap<>();
-        PairNeighbourhoodStreet pairPrev = null;
-        PairNeighbourhoodStreet pairMax = null;
+        Map<PairNeighbourhoodStreet, Long> filteredResult = new HashMap<>();
+        PairNeighbourhoodStreet prevPair = null;
+        PairNeighbourhoodStreet maxPair = null;
         Long count = Long.MIN_VALUE;
         assert result != null;
 
         for (Map.Entry<PairNeighbourhoodStreet, Long> entry : result) {
-            PairNeighbourhoodStreet pairCurr = entry.getKey();
+            PairNeighbourhoodStreet currPair = entry.getKey();
 
-            if (pairPrev != null && !pairPrev.getNeighbourhood().equals(pairCurr.getNeighbourhood())) {
-                filtered_result.put(pairMax, count);
-                pairMax = null;
+            if (prevPair != null && !prevPair.getNeighbourhood().equals(currPair.getNeighbourhood())) {
+                filteredResult.put(maxPair, count);
+                maxPair = null;
                 count = Long.MIN_VALUE;
             }
             if (entry.getValue() > count) {
-                pairMax = pairCurr.clone();
+                maxPair = currPair.clone();
                 count = entry.getValue();
             }
 
-            pairPrev = pairCurr.clone();
+            prevPair = currPair.clone();
         }
         if (result.size() > 0) {
-            filtered_result.put(pairMax, count);
+            filteredResult.put(maxPair, count);
         }
 
-        return filtered_result;
+        return filteredResult;
     }
 
     public List<Map.Entry<PairNeighbourhoodStreet, Long>> mapReduce(IList<PairNeighbourhoodStreet> streetAndNeighbourhood,

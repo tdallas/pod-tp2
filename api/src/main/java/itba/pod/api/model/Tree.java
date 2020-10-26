@@ -5,7 +5,6 @@ import com.hazelcast.nio.ObjectDataOutput;
 import com.hazelcast.nio.serialization.DataSerializable;
 
 import java.io.IOException;
-import java.io.Serializable;
 import java.util.Objects;
 
 public class Tree implements CSVEntry, DataSerializable {
