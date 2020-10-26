@@ -3,6 +3,7 @@ package itba.pod.client.utils;
 import itba.pod.api.utils.PairNeighbourhoodStreet;
 import itba.pod.api.utils.SortedPair;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
@@ -20,14 +21,24 @@ public class OutputFiles {
         this.outputFilePath = outputFilePath;
     }
 
+    // TODO ver si integers y longs se imprimen bien
+
+    private void addDirectory() {
+        File directory = new File(outputFilePath);
+        if (!directory.exists()) {
+            directory.mkdirs();
+        }
+    }
+
     public void timeStampFile(String work, int queryN) {
+        addDirectory();
 //        https://mkyong.com/java8/java-8-how-to-format-localdatetime/
-        try (FileWriter fw = new FileWriter(outputFilePath + "query" + queryN + ".txt", true)) {
+        try (FileWriter fw = new FileWriter(outputFilePath + "/query" + queryN + ".txt", true)) {
             StringBuilder sb = new StringBuilder();
             LocalDateTime now = LocalDateTime.now();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-mm-yyyy hh:mm:ss:xxxx");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/mm/yyyy hh:mm:ss:SSSS");
             String formatDateTime = now.format(formatter);
-            sb.append(formatDateTime).append("INFO Client - ").append(work).append("\n");
+            sb.append(formatDateTime).append("  INFO Client - ").append(work).append("\n");
             fw.write(sb.toString());
         } catch (IOException e) {
             e.printStackTrace();

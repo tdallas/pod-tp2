@@ -89,7 +89,8 @@ public class TreesPerCapita {
 
         for (Map.Entry<String, Long> entry : result.entrySet()) {
             Double population = neighbourhoods.get(entry.getKey()).getPopulation().doubleValue();
-            calculated_result.put(entry.getKey(), entry.getValue()/population);
+            //Round to 2 decimals here
+            calculated_result.put(entry.getKey(), Math.round(((entry.getValue()/population)*100.0))/100.0);
         }
 
         return calculated_result.entrySet().stream()

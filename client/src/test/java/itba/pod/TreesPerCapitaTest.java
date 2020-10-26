@@ -38,8 +38,8 @@ public class TreesPerCapitaTest {
         Map<String, Double> expected = new LinkedHashMap<>();
         expected.put("9",0.75);
         expected.put("10",0.50);
-        expected.put("11",1/(double)3);
-        expected.put("12",1/(double)3);
+        expected.put("11",0.33);
+        expected.put("12",0.33);
 
         neighbourhoods.put("9",new Neighbourhood("9",4));
         neighbourhoods.put("11",new Neighbourhood("11",3));

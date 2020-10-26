@@ -37,10 +37,10 @@ public class NeighbourhoodsPairsWithThousandTrees {
         List<String> addressesList = Arrays.asList(addresses.split(";"));
         OutputFiles outputFiles=new OutputFiles(outPath);
 
-        outputFiles.timeStampFile("Inicio de la lectura del archivo",1);
+        outputFiles.timeStampFile("Inicio de la lectura del archivo",5);
         CSVParser parser = new CSVParser();
         List<Tree> trees = parser.readTrees(inPath, city);
-        outputFiles.timeStampFile("Fin de la lectura del archivo",1);
+        outputFiles.timeStampFile("Fin de la lectura del archivo",5);
 
         HazelCast hz = new HazelCast(addressesList);
 
@@ -49,7 +49,7 @@ public class NeighbourhoodsPairsWithThousandTrees {
             neighbourhoodsWithTrees.add(t.getNeighbourhood());
         });
 
-        outputFiles.timeStampFile("Inicio del trabajo de map/reduce",1);
+        outputFiles.timeStampFile("Inicio del trabajo de map/reduce",5);
 
         Map<String, Long> result = null;
         try {
@@ -57,7 +57,7 @@ public class NeighbourhoodsPairsWithThousandTrees {
         } catch (Exception e) {
             // TODO manejar excepcion
         }
-        outputFiles.timeStampFile("Fin del trabajo de map/reduce",1);
+        outputFiles.timeStampFile("Fin del trabajo de map/reduce",5);
 
         List<Map.Entry<Long, SortedPair<String>>> paired_result = pairResult(result);
 
