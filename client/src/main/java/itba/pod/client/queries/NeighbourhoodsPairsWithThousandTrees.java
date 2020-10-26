@@ -61,10 +61,11 @@ public class NeighbourhoodsPairsWithThousandTrees {
 
         List<Map.Entry<Long, SortedPair<String>>> paired_result = pairResult(result);
 
-        outputFiles.NeighbourhoodsPairsWithThousandTreesWriter(paired_result);
+        outputFiles.writeNeighbourhoodPairsWithThousandTrees(paired_result);
     }
 
-    public static Map<String, Long> query(HazelCast hz, IList<String> neighbourhoodsWithTrees) throws ExecutionException, InterruptedException {
+    public static Map<String, Long> query(HazelCast hz, IList<String> neighbourhoodsWithTrees)
+            throws ExecutionException, InterruptedException {
 
         JobTracker jobTracker = hz.getJobTracker("g9neighbourhoodsPairs");
         final KeyValueSource<String,String> source = KeyValueSource.fromList(neighbourhoodsWithTrees);
@@ -82,7 +83,9 @@ public class NeighbourhoodsPairsWithThousandTrees {
     public static List<Map.Entry<Long, SortedPair<String>>> pairResult(Map<String, Long> result) {
         List<Map.Entry<String, Long>> sorted_result = result.entrySet().stream()
                                                             .filter(e -> e.getValue() >= 1000)
-                                                            .sorted(Comparator.comparingLong(Map.Entry<String, Long>::getValue).reversed()
+                                                            .sorted(Comparator
+                                                                    .comparingLong(Map.Entry<String, Long>::getValue)
+                                                                    .reversed()
                                                                     .thenComparing(Map.Entry::getKey))
                                                             .collect(Collectors.toList());
 
@@ -90,7 +93,8 @@ public class NeighbourhoodsPairsWithThousandTrees {
 
         for (int i=0; i<sorted_result.size(); i++) {
             for (int j=i+1; j<sorted_result.size() && sorted_result.get(i).getValue().equals(sorted_result.get(j).getValue()); j++) {
-                paired_result.add(new AbstractMap.SimpleEntry<>(sorted_result.get(i).getValue(), new SortedPair<>(sorted_result.get(i).getKey(), sorted_result.get(j).getKey())));
+                paired_result.add(new AbstractMap.SimpleEntry<>(sorted_result.get(i).getValue(),
+                        new SortedPair<>(sorted_result.get(i).getKey(), sorted_result.get(j).getKey())));
             }
         }
 

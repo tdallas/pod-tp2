@@ -24,7 +24,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 public class TopSpeciesWithMaxDiam {
-    private static Logger logger = LoggerFactory.getLogger(TreesPerPopulation.class);
+    private static Logger logger = LoggerFactory.getLogger(TreesPerCapita.class);
 
     public static void main(String[] args) throws InvalidArgumentException, IOException {
         String addresses = System.getProperty("addresses");
@@ -57,7 +57,7 @@ public class TopSpeciesWithMaxDiam {
         }
         outputFiles.timeStampFile("Fin del trabajo de map/reduce",3);
 
-        outputFiles.TopSpeciesWithMaxDiamWriter(result);
+        outputFiles.writeTopSpeciesWithMaxDiam(result);
     }
 
     public static List<Map.Entry<String, Double>> query(final HazelCast hz,
