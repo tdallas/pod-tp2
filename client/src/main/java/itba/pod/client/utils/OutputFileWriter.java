@@ -2,6 +2,9 @@ package itba.pod.client.utils;
 
 import itba.pod.api.utils.PairNeighbourhoodStreet;
 import itba.pod.api.utils.SortedPair;
+import itba.pod.client.queries.TopSpeciesWithMaxDiam;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -13,6 +16,8 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class OutputFileWriter {
+    private static final Logger LOGGER = LoggerFactory.getLogger(TopSpeciesWithMaxDiam.class);
+
     String outputFilePath;
     private final StringBuilder sb = new StringBuilder();
     private final String DELIMITER = ";";
@@ -93,7 +98,7 @@ public class OutputFileWriter {
     }
 
     private void toCSV(final String fileName) {
-        try (FileWriter fw = new FileWriter(outputFilePath + "/" + fileName + ".csv")) {
+        try (FileWriter fw = new FileWriter(outputFilePath + "_" + fileName + ".csv")) {
             fw.write(sb.toString());
         } catch (IOException e) {
             e.printStackTrace();

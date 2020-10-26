@@ -11,6 +11,8 @@ import itba.pod.api.model.Tree;
 import itba.pod.api.reducers.AvgReducerFactory;
 import itba.pod.client.exceptions.InvalidArgumentException;
 import itba.pod.client.utils.ArgumentValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.List;
@@ -21,8 +23,12 @@ public class TopSpeciesWithMaxDiam extends Query {
     private static final int QUERY_3 = 3;
     private Integer n;
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(TopSpeciesWithMaxDiam.class);
+
     public static void main(String[] args) throws InvalidArgumentException, IOException {
         new TopSpeciesWithMaxDiam().query();
+        LOGGER.info("EN EL MAIN");
+        System.exit(1);
     }
 
     public void query() throws InvalidArgumentException, IOException {
@@ -37,8 +43,10 @@ public class TopSpeciesWithMaxDiam extends Query {
         try {
             result = mapReduce(trees, this.n);
         } catch (Exception e) {
+            LOGGER.error("PINCHO");
             // TODO manejar excepcion
         }
+        LOGGER.info("TERMINO DE HACER LA QUERY");
         super.fileWriter.timestampEndMapReduce();
         super.fileWriter.writeTopSpeciesWithMaxDiam(result);
     }
