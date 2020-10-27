@@ -24,15 +24,19 @@ public class HazelCast {
     public <T> IList<T> getList(String name) {
         IList<T> list = instance.getList(name);
         list.clear();
-//        lists.add(list);
+
         return list;
     }
 
     public <K, V> IMap<K, V> getMap(String name) {
         IMap<K,V> map = instance.getMap(name);
         map.clear();
-//        maps.add(map);
+
         return map;
+    }
+
+    public void shutdown() {
+        this.instance.shutdown();
     }
 
     public JobTracker getJobTracker(String name) {

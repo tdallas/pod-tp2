@@ -45,12 +45,14 @@ public class StreetWithMaxTrees extends Query {
         super.fileWriter.timestampEndMapReduce();
 
         if (result.isEmpty()) {
+            super.printEmptyQueryResult(QUERY_2);
+        } else {
             Map<PairNeighbourhoodStreet, Long> filteredResult = filterResult(result);
             super.fileWriter.writeStreetWithMaxTrees(filteredResult);
             super.printFinishedQuery(QUERY_2);
-        } else {
-            super.printEmptyQueryResult(QUERY_2);
         }
+
+        super.hz.shutdown();
     }
 
     public Map<PairNeighbourhoodStreet, Long> filterResult(List<Map.Entry<PairNeighbourhoodStreet, Long>> result) {

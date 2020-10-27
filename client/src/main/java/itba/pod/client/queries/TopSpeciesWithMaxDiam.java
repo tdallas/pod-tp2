@@ -23,12 +23,8 @@ public class TopSpeciesWithMaxDiam extends Query {
     public static final int QUERY_3 = 3;
     private Integer n;
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(TopSpeciesWithMaxDiam.class);
-
     public static void main(String[] args) throws InvalidArgumentException, IOException {
         new TopSpeciesWithMaxDiam().query();
-        LOGGER.info("EN EL MAIN");
-        System.exit(1);
     }
 
     public void query() throws InvalidArgumentException, IOException {
@@ -48,11 +44,13 @@ public class TopSpeciesWithMaxDiam extends Query {
         super.fileWriter.timestampEndMapReduce();
 
         if (result.isEmpty()) {
+            super.printEmptyQueryResult(QUERY_3);
+        } else {
             super.fileWriter.writeTopSpeciesWithMaxDiam(result);
             super.printFinishedQuery(QUERY_3);
-        } else {
-            super.printEmptyQueryResult(QUERY_3);
         }
+
+        super.hz.shutdown();
     }
 
     public List<Map.Entry<String, Double>> mapReduce(final IList<Tree> trees, final Integer n)

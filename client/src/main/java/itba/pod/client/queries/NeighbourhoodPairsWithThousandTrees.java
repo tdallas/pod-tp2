@@ -40,12 +40,14 @@ public class NeighbourhoodPairsWithThousandTrees extends Query {
         super.fileWriter.timestampEndMapReduce();
 
         if (result.isEmpty()) {
+            super.printEmptyQueryResult(QUERY_5);
+        } else {
             List<Map.Entry<Long, SortedPair<String>>> pairedResult = pairNeighbourhoods(result);
             super.fileWriter.writeNeighbourhoodPairsWithThousandTrees(pairedResult);
             super.printFinishedQuery(QUERY_5);
-        } else {
-            super.printEmptyQueryResult(QUERY_5);
         }
+
+        super.hz.shutdown();
     }
 
     public List<Map.Entry<String, Long>> mapReduce(IList<Tree> trees) throws ExecutionException, InterruptedException {

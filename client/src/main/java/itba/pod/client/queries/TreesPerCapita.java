@@ -44,11 +44,11 @@ public class TreesPerCapita extends Query {
         super.fileWriter.timestampEndMapReduce();
 
         if (result.isEmpty()) {
+            super.printEmptyQueryResult(QUERY_1);
+        } else {
             Stream<Map.Entry<String, Double>> sortedResult = filterResult(result, neighbourhoods);
             super.fileWriter.writeTreesPerCapita(sortedResult);
             super.printFinishedQuery(QUERY_1);
-        } else {
-            super.printEmptyQueryResult(QUERY_1);
         }
     }
 

@@ -46,12 +46,14 @@ public class NeighbourhoodPairsWithMinTrees extends Query {
         super.fileWriter.timestampEndMapReduce();
 
         if (result.isEmpty()) {
+            super.printEmptyQueryResult(QUERY_4);
+        } else {
             List<Map.Entry<String, String>> neighbourhoodPairs = pairNeighbourhoods(result);
             super.fileWriter.writeNeighbourhoodPairsWithMinTrees(neighbourhoodPairs);
             super.printFinishedQuery(QUERY_4);
-        } else {
-            super.printEmptyQueryResult(QUERY_4);
         }
+
+        super.hz.shutdown();
     }
 
     public List<Map.Entry<String, Long>> mapReduce(final IList<Tree> trees, Integer minTrees, String species)
