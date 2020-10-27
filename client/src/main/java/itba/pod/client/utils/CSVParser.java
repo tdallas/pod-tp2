@@ -14,8 +14,8 @@ import java.util.*;
 public class CSVParser {
 
     // Possible data types to process and query
-    private static final String TREES = "arboles";
-    private static final String NEIGHBOURHOODS = "barrios";
+    private static final String TREES = "/arboles";
+    private static final String NEIGHBOURHOODS = "/barrios";
 
     private static final String DELIMITER = ";";
 
@@ -155,7 +155,7 @@ public class CSVParser {
         String scientificName = row[indexes.get(Tree.SCIENTIFIC_NAME)];
         String diameterString = row[indexes.get(Tree.DIAMETER)];
 
-        if (neighbourhood.isEmpty() || street.isEmpty() || scientificName.isEmpty() || diameterString.isEmpty() || Double.parseDouble(diameterString) <= 0)
+        if (neighbourhood.isEmpty() || street.isEmpty() || scientificName.isEmpty() || diameterString.isEmpty())
             return Optional.empty();
 
         return Optional.of(new Tree(neighbourhood, street, scientificName, Double.parseDouble(diameterString)));
