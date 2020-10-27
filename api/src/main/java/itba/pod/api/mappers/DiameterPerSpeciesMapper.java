@@ -3,7 +3,6 @@ package itba.pod.api.mappers;
 import com.hazelcast.mapreduce.Context;
 import com.hazelcast.mapreduce.Mapper;
 import itba.pod.api.model.Tree;
-import itba.pod.api.utils.Pair;
 
 public class DiameterPerSpeciesMapper implements Mapper<String, Tree, String, Double> {
 
