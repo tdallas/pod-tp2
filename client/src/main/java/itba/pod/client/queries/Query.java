@@ -40,7 +40,7 @@ public class Query {
 
     public Map<String, Neighbourhood> readNeighbourhoods() throws IOException {
         CSVParser parser = new CSVParser();
-        fileWriter.timestampBeginMapReduce();
+        fileWriter.timestampBeginFileRead();
         Map<String, Neighbourhood> neighbourhoods = parser.readNeighbourhoods(inPath, city);
         fileWriter.timestampEndFileRead();
 
