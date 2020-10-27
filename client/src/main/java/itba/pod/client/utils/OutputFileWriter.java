@@ -29,9 +29,8 @@ public class OutputFileWriter {
     }
 
     public void timeStampFile(String work) {
-        // TODO: Get rid of this link
-//        https://mkyong.com/java8/java-8-how-to-format-localdatetime/
-        try (FileWriter fw = new FileWriter(outputFilePath + "query" + queryNumber + ".txt", true)) {
+        addDirectory();
+        try (FileWriter fw = new FileWriter(outputFilePath + "/query" + queryNumber + ".txt", true)) {
             StringBuilder sb = new StringBuilder();
             LocalDateTime now = LocalDateTime.now();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/mm/yyyy hh:mm:ss:SSSS");
