@@ -98,7 +98,7 @@ public class OutputFileWriter {
     }
 
     private void toCSV(final String fileName) {
-        try (FileWriter fw = new FileWriter(outputFilePath + "_" + fileName + ".csv")) {
+        try (FileWriter fw = new FileWriter(outputFilePath + "/" + fileName + ".csv")) {
             fw.write(sb.toString());
         } catch (IOException e) {
             e.printStackTrace();
