@@ -17,7 +17,7 @@ public class Query {
     private String addresses;
     public String city;
     public String inPath;
-    private String outPath;
+    public String outPath;
     public OutputFileWriter fileWriter;
     public HazelCast hz;
 
@@ -54,6 +54,15 @@ public class Query {
         outPath = System.getProperty("outPath");
 
         ArgumentValidator.validate(addresses, city, inPath, outPath);
+    }
+
+    public void printFinishedQuery(final Integer n) {
+        System.out.println("Query " + n + " finished processing, you can find the results in " + outPath + "/query"
+                + n + ".csv");
+    }
+
+    public void printEmptyQueryResult(final Integer n) {
+        System.out.println("There are no results to show for query " + n);
     }
 
     public void setHazelcast(HazelCast hz) {

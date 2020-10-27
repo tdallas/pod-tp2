@@ -20,7 +20,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
 public class StreetWithMaxTrees extends Query {
-    private static final int QUERY_2 = 2;
+    public static final int QUERY_2 = 2;
     private Integer minTrees;
 
     public static void main(String[] args) throws InvalidArgumentException, IOException {
@@ -44,11 +44,16 @@ public class StreetWithMaxTrees extends Query {
         }
         super.fileWriter.timestampEndMapReduce();
 
-        Map<PairNeighbourhoodStreet, Long> filteredResult = filteredResult(result);
-        super.fileWriter.writeStreetWithMaxTrees(filteredResult);
+        if (result.isEmpty()) {
+            Map<PairNeighbourhoodStreet, Long> filteredResult = filterResult(result);
+            super.fileWriter.writeStreetWithMaxTrees(filteredResult);
+            super.printFinishedQuery(QUERY_2);
+        } else {
+            super.printEmptyQueryResult(QUERY_2);
+        }
     }
 
-    public Map<PairNeighbourhoodStreet, Long> filteredResult(List<Map.Entry<PairNeighbourhoodStreet, Long>> result) {
+    public Map<PairNeighbourhoodStreet, Long> filterResult(List<Map.Entry<PairNeighbourhoodStreet, Long>> result) {
         Map<PairNeighbourhoodStreet, Long> filteredResult = new HashMap<>();
         PairNeighbourhoodStreet prevPair = null;
         PairNeighbourhoodStreet maxPair = null;
@@ -78,7 +83,6 @@ public class StreetWithMaxTrees extends Query {
                         .sorted(Map.Entry.comparingByKey())
                         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue,
                                 (oldValue, newValue) -> oldValue, LinkedHashMap::new));
-
     }
 
     public List<Map.Entry<PairNeighbourhoodStreet, Long>> mapReduce(IList<PairNeighbourhoodStreet> streetAndNeighbourhood,

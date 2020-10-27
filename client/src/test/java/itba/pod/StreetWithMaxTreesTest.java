@@ -9,20 +9,18 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.LinkedHashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertTrue;
 
 public class StreetWithMaxTreesTest {
     private final StreetWithMaxTrees query2 = new StreetWithMaxTrees();
     private IList<PairNeighbourhoodStreet> streetAndNeighbourhood;
 
     @Before
-    public void createTrees() {
+    public void setupHazelcast() {
         List<String> addresses = List.of("127.0.0.1");
         HazelCast hz = new HazelCast(addresses);
         streetAndNeighbourhood = hz.getList("g9streetMaxTrees");
@@ -45,7 +43,7 @@ public class StreetWithMaxTreesTest {
         streetAndNeighbourhood.add(new PairNeighbourhoodStreet("ABC","11"));
 
         List<Map.Entry<PairNeighbourhoodStreet, Long>> result = query2.mapReduce(streetAndNeighbourhood, 1);
-        Map<PairNeighbourhoodStreet,Long> filteredResult = query2.filteredResult(result);
+        Map<PairNeighbourhoodStreet,Long> filteredResult = query2.filterResult(result);
 
         assertEquals(expected.size(),filteredResult.size());
         assertEquals(expected, filteredResult);

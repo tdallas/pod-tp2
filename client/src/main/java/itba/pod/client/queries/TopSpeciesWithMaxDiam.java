@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
 public class TopSpeciesWithMaxDiam extends Query {
-    private static final int QUERY_3 = 3;
+    public static final int QUERY_3 = 3;
     private Integer n;
 
     private static final Logger LOGGER = LoggerFactory.getLogger(TopSpeciesWithMaxDiam.class);
@@ -43,12 +43,16 @@ public class TopSpeciesWithMaxDiam extends Query {
         try {
             result = mapReduce(trees, this.n);
         } catch (Exception e) {
-            LOGGER.error("PINCHO");
             // TODO manejar excepcion
         }
-        LOGGER.info("TERMINO DE HACER LA QUERY");
         super.fileWriter.timestampEndMapReduce();
-        super.fileWriter.writeTopSpeciesWithMaxDiam(result);
+
+        if (result.isEmpty()) {
+            super.fileWriter.writeTopSpeciesWithMaxDiam(result);
+            super.printFinishedQuery(QUERY_3);
+        } else {
+            super.printEmptyQueryResult(QUERY_3);
+        }
     }
 
     public List<Map.Entry<String, Double>> mapReduce(final IList<Tree> trees, final Integer n)

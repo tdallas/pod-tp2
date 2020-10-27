@@ -40,17 +40,18 @@ public class NeighbourhoodPairsWithMinTrees extends Query {
         List<Map.Entry<String, Long>> result = List.of();
         try {
             result = mapReduce(trees, this.minTrees, this.species);
-
-            // TODO: Evaluate if this should be a custom exception
-            if (result.isEmpty())
-                throw new Exception();
         } catch (Exception e) {
             // TODO manejar excepcion
         }
         super.fileWriter.timestampEndMapReduce();
 
-        List<Map.Entry<String, String>> neighbourhoodPairs = pairNeighbourhoods(result);
-        super.fileWriter.writeNeighbourhoodPairsWithMinTrees(neighbourhoodPairs);
+        if (result.isEmpty()) {
+            List<Map.Entry<String, String>> neighbourhoodPairs = pairNeighbourhoods(result);
+            super.fileWriter.writeNeighbourhoodPairsWithMinTrees(neighbourhoodPairs);
+            super.printFinishedQuery(QUERY_4);
+        } else {
+            super.printEmptyQueryResult(QUERY_4);
+        }
     }
 
     public List<Map.Entry<String, Long>> mapReduce(final IList<Tree> trees, Integer minTrees, String species)
