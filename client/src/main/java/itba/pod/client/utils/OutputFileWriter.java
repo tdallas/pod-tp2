@@ -2,9 +2,6 @@ package itba.pod.client.utils;
 
 import itba.pod.api.utils.PairNeighbourhoodStreet;
 import itba.pod.api.utils.SortedPair;
-import itba.pod.client.queries.TopSpeciesWithMaxDiam;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -16,8 +13,6 @@ import java.util.Map;
 import java.util.stream.Stream;
 
 public class OutputFileWriter {
-    private static final Logger LOGGER = LoggerFactory.getLogger(TopSpeciesWithMaxDiam.class);
-
     String outputFilePath;
     private final StringBuilder sb = new StringBuilder();
     private final String DELIMITER = ";";
@@ -33,7 +28,7 @@ public class OutputFileWriter {
         try (FileWriter fw = new FileWriter(outputFilePath + "/query" + queryNumber + ".txt", true)) {
             StringBuilder sb = new StringBuilder();
             LocalDateTime now = LocalDateTime.now();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/mm/yyyy hh:mm:ss:SSSS");
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy hh:mm:ss:SSSS");
             String formatDateTime = now.format(formatter);
             sb.append(formatDateTime).append("  INFO Client - ").append(work).append("\n");
             fw.write(sb.toString());
@@ -44,9 +39,9 @@ public class OutputFileWriter {
 
     private void addDirectory() {
         File directory = new File(outputFilePath);
-        if (!directory.exists()) {
+
+        if (!directory.exists())
             directory.mkdirs();
-        }
     }
 
     public void writeTreesPerCapita(Stream<Map.Entry<String, Double>> results) {
@@ -55,7 +50,7 @@ public class OutputFileWriter {
                 .append(e.getKey()).append(DELIMITER)
                 .append(String.format("%.2f", e.getValue()))
                 .append("\n"));
-        this.toCSV("query1");
+        this.toCSV();
     }
 
     public void writeStreetWithMaxTrees(Map<PairNeighbourhoodStreet, Long> results) {
@@ -65,7 +60,7 @@ public class OutputFileWriter {
                 .append(k.getStreet()).append(DELIMITER)
                 .append(v)
                 .append("\n"));
-        this.toCSV("query2");
+        this.toCSV();
     }
 
     public void writeTopSpeciesWithMaxDiam(List<Map.Entry<String, Double>> results) {
@@ -74,7 +69,7 @@ public class OutputFileWriter {
                 .append(e.getKey()).append(DELIMITER)
                 .append(String.format("%.2f", e.getValue()))
                 .append("\n"));
-        this.toCSV("query3");
+        this.toCSV();
     }
 
     public void writeNeighbourhoodPairsWithMinTrees(List<Map.Entry<String, String>> results) {
@@ -83,7 +78,7 @@ public class OutputFileWriter {
                 .append(e.getKey()).append(DELIMITER)
                 .append(e.getValue())
                 .append("\n"));
-        this.toCSV("query4");
+        this.toCSV();
     }
 
     public void writeNeighbourhoodPairsWithThousandTrees(List<Map.Entry<Long, SortedPair<String>>> results) {
@@ -93,11 +88,11 @@ public class OutputFileWriter {
                 .append(e.getValue().getA()).append(DELIMITER)
                 .append(e.getValue().getB())
                 .append("\n"));
-        this.toCSV("query5");
+        this.toCSV();
     }
 
-    private void toCSV(final String fileName) {
-        try (FileWriter fw = new FileWriter(outputFilePath + "/" + fileName + ".csv")) {
+    private void toCSV() {
+        try (FileWriter fw = new FileWriter(outputFilePath + "/query" + queryNumber + ".csv")) {
             fw.write(sb.toString());
         } catch (IOException e) {
             e.printStackTrace();

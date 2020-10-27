@@ -22,6 +22,5 @@ public class ThousandReducerFactory implements ReducerFactory<String, Long, Long
         public Long finalizeReduce() {
             return (Math.floorDiv(trees, 1000L)) * 1000;
         }
-
     }
 }

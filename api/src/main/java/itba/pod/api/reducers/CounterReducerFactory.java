@@ -11,7 +11,7 @@ public class CounterReducerFactory<K> implements ReducerFactory<K, Long, Long> {
 
     private class CounterReducer extends Reducer<Long, Long> {
 
-        private volatile long sum;
+        private long sum;
 
         @Override
         public void reduce(Long value) {

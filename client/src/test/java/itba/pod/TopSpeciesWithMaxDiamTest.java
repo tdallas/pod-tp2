@@ -16,7 +16,7 @@ public class TopSpeciesWithMaxDiamTest {
     private final TopSpeciesWithMaxDiam query3 = new TopSpeciesWithMaxDiam();
 
     @Before
-    public void createTrees() {
+    public void setupHazelcast() {
         List<String> addresses = List.of("127.0.0.1");
         HazelCast hz = new HazelCast(addresses);
         trees = hz.getList("g9topNSpecies");

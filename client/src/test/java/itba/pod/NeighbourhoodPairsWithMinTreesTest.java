@@ -18,7 +18,7 @@ public class NeighbourhoodPairsWithMinTreesTest {
     private IList<Tree> trees;
 
     @Before
-    public void createTrees() {
+    public void setupHazelcast() {
         List<String> addresses = List.of("127.0.0.1");
         HazelCast hz = new HazelCast(addresses);
         trees = hz.getList("g9minTrees");
@@ -27,15 +27,15 @@ public class NeighbourhoodPairsWithMinTreesTest {
 
     @Test
     public void testNeighbourhoodPairing() {
-        List<Map.Entry<String, Long>> treesPerNeighbourhood = new LinkedList<>();
-
         // Keep the alphabetical order
-        treesPerNeighbourhood.add(Map.entry("A", 1L));
-        treesPerNeighbourhood.add(Map.entry("B", 1L));
-        treesPerNeighbourhood.add(Map.entry("C", 1L));
-        treesPerNeighbourhood.add(Map.entry("D", 1L));
+        List<Map.Entry<String, Long>> treesPerNeighbourhood = List.of(
+            Map.entry("A", 1L),
+            Map.entry("B", 1L),
+            Map.entry("C", 1L),
+            Map.entry("D", 1L)
+        );
 
-        var pairs = query4.pairNeighbourhoods(treesPerNeighbourhood);
+        List<Map.Entry<String, String>> pairs = query4.pairNeighbourhoods(treesPerNeighbourhood);
 
         List<Map.Entry<String, String>> expected = new LinkedList<>();
 

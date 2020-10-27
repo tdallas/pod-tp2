@@ -23,7 +23,7 @@ public class TreesPerCapitaTest {
     private final Map<String, Neighbourhood> neighbourhoods = new LinkedHashMap<>();
 
     @Before
-    public void createTrees() {
+    public void setupHazelcast() {
         List<String> addresses = List.of("127.0.0.1");
         HazelCast hz = new HazelCast(addresses);
         trees = hz.getList("g9treesPerPop");
