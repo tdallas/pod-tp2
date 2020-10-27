@@ -11,6 +11,9 @@ import itba.pod.api.model.Neighbourhood;
 import itba.pod.api.model.Tree;
 import itba.pod.api.reducers.CounterReducerFactory;
 import itba.pod.client.exceptions.InvalidArgumentException;
+import itba.pod.client.exceptions.QueryException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
@@ -20,35 +23,42 @@ import java.util.stream.Stream;
 public class TreesPerCapita extends Query {
     public static final int QUERY_1 = 1;
 
-    public static void main(String[] args) throws InvalidArgumentException, IOException {
-        new TreesPerCapita().query();
+    private static final Logger LOGGER = LoggerFactory.getLogger(StreetWithMaxTrees.class);
+
+    public static void main(String[] args) {
+        try {
+            new TreesPerCapita().query();
+        } catch (QueryException e) {
+            e.dealWithSpecificException(LOGGER);
+        }
     }
 
-    public void query() throws InvalidArgumentException, IOException {
-        setup(QUERY_1);
-
-        Map<String, Neighbourhood> neighbourhoods = readNeighbourhoods();
-        List<Tree> trees = readTrees();
-        IList<String> neighbourhoodsWithTrees = super.hz.getList("g9dataSource");
-        trees.forEach(t-> {
-            if (neighbourhoods.containsKey(t.getNeighbourhood())) neighbourhoodsWithTrees.add(t.getNeighbourhood());
-        });
-
-        super.fileWriter.timestampBeginMapReduce();
-        Map<String, Long> result = Map.of();
+    public void query() throws QueryException {
         try {
-            result = mapReduce(neighbourhoodsWithTrees);
-        } catch (Exception e) {
-            // TODO manejar excepcion
-        }
-        super.fileWriter.timestampEndMapReduce();
+            setup(QUERY_1);
 
-        if (result.isEmpty()) {
-            super.printEmptyQueryResult(QUERY_1);
-        } else {
-            Stream<Map.Entry<String, Double>> sortedResult = filterResult(result, neighbourhoods);
-            super.fileWriter.writeTreesPerCapita(sortedResult);
-            super.printFinishedQuery(QUERY_1);
+            Map<String, Neighbourhood> neighbourhoods = readNeighbourhoods();
+            List<Tree> trees = readTrees();
+            IList<String> neighbourhoodsWithTrees = super.hz.getList("g9dataSource");
+            trees.forEach(t -> {
+                if (neighbourhoods.containsKey(t.getNeighbourhood())) neighbourhoodsWithTrees.add(t.getNeighbourhood());
+            });
+
+            super.fileWriter.timestampBeginMapReduce();
+            Map<String, Long> result = mapReduce(neighbourhoodsWithTrees);
+            super.fileWriter.timestampEndMapReduce();
+
+            if (result.isEmpty()) {
+                super.printEmptyQueryResult(QUERY_1);
+            } else {
+                Stream<Map.Entry<String, Double>> sortedResult = filterResult(result, neighbourhoods);
+                super.fileWriter.writeTreesPerCapita(sortedResult);
+                super.printFinishedQuery(QUERY_1);
+            }
+
+            super.hz.shutdown();
+        } catch (InvalidArgumentException | IOException | ExecutionException | InterruptedException e) {
+            throw new QueryException(e);
         }
     }
 

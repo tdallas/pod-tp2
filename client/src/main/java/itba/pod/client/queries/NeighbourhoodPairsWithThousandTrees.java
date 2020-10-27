@@ -12,6 +12,9 @@ import itba.pod.api.model.Tree;
 import itba.pod.api.reducers.ThousandReducerFactory;
 import itba.pod.api.utils.SortedPair;
 import itba.pod.client.exceptions.InvalidArgumentException;
+import itba.pod.client.exceptions.QueryException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
@@ -20,34 +23,39 @@ import java.util.concurrent.ExecutionException;
 public class NeighbourhoodPairsWithThousandTrees extends Query {
     public static final int QUERY_5 = 5;
 
-    public static void main(String[] args) throws InvalidArgumentException, IOException {
-        new NeighbourhoodPairsWithThousandTrees().query();
+    private static final Logger LOGGER = LoggerFactory.getLogger(NeighbourhoodPairsWithThousandTrees.class);
+
+    public static void main(String[] args) {
+        try {
+            new NeighbourhoodPairsWithThousandTrees().query();
+        } catch (QueryException e) {
+            e.dealWithSpecificException(LOGGER);
+        }
     }
 
-    public void query() throws InvalidArgumentException, IOException {
-        setup(QUERY_5);
-
-        IList<Tree> trees = super.hz.getList("g9dataSource");
-        trees.addAll(readTrees());
-
-        super.fileWriter.timestampBeginMapReduce();
-        List<Map.Entry<String, Long>> result = List.of();
+    public void query() throws QueryException {
         try {
-            result = mapReduce(trees);
-        } catch (Exception e) {
-            // TODO manejar excepcion
-        }
-        super.fileWriter.timestampEndMapReduce();
+            setup(QUERY_5);
 
-        if (result.isEmpty()) {
-            super.printEmptyQueryResult(QUERY_5);
-        } else {
-            List<Map.Entry<Long, SortedPair<String>>> pairedResult = pairNeighbourhoods(result);
-            super.fileWriter.writeNeighbourhoodPairsWithThousandTrees(pairedResult);
-            super.printFinishedQuery(QUERY_5);
-        }
+            IList<Tree> trees = super.hz.getList("g9dataSource");
+            trees.addAll(readTrees());
 
-        super.hz.shutdown();
+            super.fileWriter.timestampBeginMapReduce();
+            List<Map.Entry<String, Long>> result = mapReduce(trees);
+            super.fileWriter.timestampEndMapReduce();
+
+            if (result.isEmpty()) {
+                super.printEmptyQueryResult(QUERY_5);
+            } else {
+                List<Map.Entry<Long, SortedPair<String>>> pairedResult = pairNeighbourhoods(result);
+                super.fileWriter.writeNeighbourhoodPairsWithThousandTrees(pairedResult);
+                super.printFinishedQuery(QUERY_5);
+            }
+
+            super.hz.shutdown();
+        }  catch (InvalidArgumentException | IOException | ExecutionException | InterruptedException e) {
+            throw new QueryException(e);
+        }
     }
 
     public List<Map.Entry<String, Long>> mapReduce(IList<Tree> trees) throws ExecutionException, InterruptedException {

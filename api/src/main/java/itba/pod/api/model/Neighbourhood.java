@@ -10,7 +10,6 @@ import java.util.Objects;
 
 public class Neighbourhood implements CSVEntry, DataSerializable {
 
-
     // Neighbourhood fields (standard name)
     public static final String NAME = "NAME";
     public static final String POPULATION = "POPULATION";

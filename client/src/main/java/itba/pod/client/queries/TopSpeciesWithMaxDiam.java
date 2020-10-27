@@ -10,6 +10,7 @@ import itba.pod.api.mappers.DiameterPerSpeciesMapper;
 import itba.pod.api.model.Tree;
 import itba.pod.api.reducers.AvgReducerFactory;
 import itba.pod.client.exceptions.InvalidArgumentException;
+import itba.pod.client.exceptions.QueryException;
 import itba.pod.client.utils.ArgumentValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -23,34 +24,39 @@ public class TopSpeciesWithMaxDiam extends Query {
     public static final int QUERY_3 = 3;
     private Integer n;
 
-    public static void main(String[] args) throws InvalidArgumentException, IOException {
-        new TopSpeciesWithMaxDiam().query();
+    private static final Logger LOGGER = LoggerFactory.getLogger(TopSpeciesWithMaxDiam.class);
+
+    public static void main(String[] args) {
+        try {
+            new TopSpeciesWithMaxDiam().query();
+        } catch (QueryException e) {
+            e.dealWithSpecificException(LOGGER);
+        }
     }
 
-    public void query() throws InvalidArgumentException, IOException {
-        setup(QUERY_3);
-        readAdditionalArguments();
-
-        IList<Tree> trees = super.hz.getList("g9dataSource");
-        trees.addAll(readTrees());
-
-        List<Map.Entry<String, Double>> result = List.of();
-        super.fileWriter.timestampBeginMapReduce();
+    public void query() throws QueryException {
         try {
-            result = mapReduce(trees, this.n);
-        } catch (Exception e) {
-            // TODO manejar excepcion
-        }
-        super.fileWriter.timestampEndMapReduce();
+            setup(QUERY_3);
+            readAdditionalArguments();
 
-        if (result.isEmpty()) {
-            super.printEmptyQueryResult(QUERY_3);
-        } else {
-            super.fileWriter.writeTopSpeciesWithMaxDiam(result);
-            super.printFinishedQuery(QUERY_3);
-        }
+            IList<Tree> trees = super.hz.getList("g9dataSource");
+            trees.addAll(readTrees());
 
-        super.hz.shutdown();
+            super.fileWriter.timestampBeginMapReduce();
+            List<Map.Entry<String, Double>> result = mapReduce(trees, this.n);
+            super.fileWriter.timestampEndMapReduce();
+
+            if (result.isEmpty()) {
+                super.printEmptyQueryResult(QUERY_3);
+            } else {
+                super.fileWriter.writeTopSpeciesWithMaxDiam(result);
+                super.printFinishedQuery(QUERY_3);
+            }
+
+            super.hz.shutdown();
+        }  catch (InvalidArgumentException | IOException | ExecutionException | InterruptedException e) {
+            throw new QueryException(e);
+        }
     }
 
     public List<Map.Entry<String, Double>> mapReduce(final IList<Tree> trees, final Integer n)

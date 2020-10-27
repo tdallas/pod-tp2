@@ -12,7 +12,10 @@ import itba.pod.api.model.Tree;
 import itba.pod.api.reducers.CounterReducerFactory;
 import itba.pod.api.utils.PairNeighbourhoodStreet;
 import itba.pod.client.exceptions.InvalidArgumentException;
+import itba.pod.client.exceptions.QueryException;
 import itba.pod.client.utils.ArgumentValidator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.*;
@@ -23,36 +26,41 @@ public class StreetWithMaxTrees extends Query {
     public static final int QUERY_2 = 2;
     private Integer minTrees;
 
-    public static void main(String[] args) throws InvalidArgumentException, IOException {
-        new StreetWithMaxTrees().query();
+    private static final Logger LOGGER = LoggerFactory.getLogger(StreetWithMaxTrees.class);
+
+    public static void main(String[] args) {
+        try {
+            new StreetWithMaxTrees().query();
+        } catch (QueryException e) {
+            e.dealWithSpecificException(LOGGER);
+        }
     }
 
-    public void query() throws InvalidArgumentException, IOException {
-        setup(QUERY_2);
-        readAdditionalArguments();
-
-        List<Tree> trees = readTrees();
-        IList<PairNeighbourhoodStreet> streetAndNeighbourhood = super.hz.getList("g9dataSource");
-        trees.forEach(t -> streetAndNeighbourhood.add(new PairNeighbourhoodStreet(t.getStreet(), t.getNeighbourhood())));
-
-        List<Map.Entry<PairNeighbourhoodStreet, Long>> result = List.of();
-        super.fileWriter.timestampBeginMapReduce();
+    public void query() throws QueryException {
         try {
-            result = mapReduce(streetAndNeighbourhood, this.minTrees);
-        } catch (Exception e) {
-            // TODO manejar excepcion
-        }
-        super.fileWriter.timestampEndMapReduce();
+            setup(QUERY_2);
+            readAdditionalArguments();
 
-        if (result.isEmpty()) {
-            super.printEmptyQueryResult(QUERY_2);
-        } else {
-            Map<PairNeighbourhoodStreet, Long> filteredResult = filterResult(result);
-            super.fileWriter.writeStreetWithMaxTrees(filteredResult);
-            super.printFinishedQuery(QUERY_2);
-        }
+            List<Tree> trees = readTrees();
+            IList<PairNeighbourhoodStreet> streetAndNeighbourhood = super.hz.getList("g9dataSource");
+            trees.forEach(t -> streetAndNeighbourhood.add(new PairNeighbourhoodStreet(t.getStreet(), t.getNeighbourhood())));
 
-        super.hz.shutdown();
+            super.fileWriter.timestampBeginMapReduce();
+            List<Map.Entry<PairNeighbourhoodStreet, Long>> result = mapReduce(streetAndNeighbourhood, this.minTrees);
+            super.fileWriter.timestampEndMapReduce();
+
+            if (result.isEmpty()) {
+                super.printEmptyQueryResult(QUERY_2);
+            } else {
+                Map<PairNeighbourhoodStreet, Long> filteredResult = filterResult(result);
+                super.fileWriter.writeStreetWithMaxTrees(filteredResult);
+                super.printFinishedQuery(QUERY_2);
+            }
+
+            super.hz.shutdown();
+        }  catch (InvalidArgumentException | IOException | ExecutionException | InterruptedException e) {
+            throw new QueryException(e);
+        }
     }
 
     public Map<PairNeighbourhoodStreet, Long> filterResult(List<Map.Entry<PairNeighbourhoodStreet, Long>> result) {

@@ -43,7 +43,7 @@ public class ArgumentValidator {
         try {
             int integer = Integer.parseInt(num);
 
-            if (integer < 0) throw new InvalidArgumentException("number should be a positive integer");
+            if (integer < 0) throw new InvalidArgumentException(argumentName + " should be a positive integer");
         } catch (NumberFormatException e) {
             e.printStackTrace();
         }
