@@ -19,6 +19,10 @@
 		<fileSet>
 			<directory>src/main/assembly/overlay</directory>
 			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>run-server.sh</include>
+			</includes>
+			<fileMode>777</fileMode>
 			<filtered>true</filtered>
 		</fileSet>
 		<fileSet>

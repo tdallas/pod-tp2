@@ -19,6 +19,14 @@
 		<fileSet>
 			<directory>src/main/assembly/overlay</directory>
 			<outputDirectory>/</outputDirectory>
+			<includes>
+				<include>query1</include>
+				<include>query2</include>
+				<include>query3</include>
+				<include>query4</include>
+				<include>query5</include>
+			</includes>
+			<fileMode>777</fileMode>
 			<filtered>false</filtered>
 		</fileSet>
 		<fileSet>
