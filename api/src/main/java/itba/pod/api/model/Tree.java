@@ -5,6 +5,7 @@ import com.hazelcast.nio.ObjectDataOutput;
 import com.hazelcast.nio.serialization.DataSerializable;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 
 public class Tree implements CSVEntry, DataSerializable {
@@ -48,6 +49,10 @@ public class Tree implements CSVEntry, DataSerializable {
     @Override
     public String toString() {
         return String.join(", ", neighbourhood, street, scientificName, diameter.toString());
+    }
+
+    public static List<String> getStandardHeaders() {
+        return List.of(NEIGHBOURHOOD, STREET, SCIENTIFIC_NAME, DIAMETER);
     }
 
     @Override

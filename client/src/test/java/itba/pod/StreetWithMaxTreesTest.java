@@ -1,7 +1,6 @@
 package itba.pod;
 
 import com.hazelcast.core.IList;
-import itba.pod.api.model.Tree;
 import itba.pod.api.utils.PairNeighbourhoodStreet;
 import itba.pod.client.queries.StreetWithMaxTrees;
 import itba.pod.client.utils.HazelCast;

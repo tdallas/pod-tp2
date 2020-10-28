@@ -6,9 +6,13 @@ import itba.pod.client.queries.TopSpeciesWithMaxDiam;
 import itba.pod.client.utils.HazelCast;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
-import java.util.*;
+
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ExecutionException;
+
+import static org.junit.Assert.assertArrayEquals;
 
 
 public class TopSpeciesWithMaxDiamTest {

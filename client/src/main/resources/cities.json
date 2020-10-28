@@ -1,0 +1,26 @@
+{
+  "BUE": {
+    "TREES": {
+      "NEIGHBOURHOOD": "comuna",
+      "STREET": "calle_nombre",
+      "SCIENTIFIC_NAME": "nombre_cientifico",
+      "DIAMETER": "diametro_altura_pecho"
+    },
+    "NEIGHBOURHOODS": {
+      "NAME": "nombre",
+      "POPULATION": "habitantes"
+    }
+  },
+  "VAN": {
+    "TREES": {
+      "NEIGHBOURHOOD": "NEIGHBOURHOOD_NAME",
+      "STREET": "STD_STREET",
+      "SCIENTIFIC_NAME": "COMMON_NAME",
+      "DIAMETER": "DIAMETER"
+    },
+    "NEIGHBOURHOODS": {
+      "NAME": "nombre",
+      "POPULATION": "habitantes"
+    }
+  }
+}

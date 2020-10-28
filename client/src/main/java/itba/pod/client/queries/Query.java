@@ -20,8 +20,13 @@ public class Query {
     public String outPath;
     public OutputFileWriter fileWriter;
     public HazelCast hz;
+    private final CSVParser parser;
 
-    public void setup(final int queryNumber) throws InvalidArgumentException {
+    public Query() {
+        parser = new CSVParser();
+    }
+
+    public void setup(final int queryNumber) throws InvalidArgumentException, IOException {
         readArguments();
 
         List<String> addressesList = Arrays.asList(addresses.split(";"));
@@ -30,7 +35,6 @@ public class Query {
     }
 
     public List<Tree> readTrees() throws IOException {
-        CSVParser parser = new CSVParser();
         fileWriter.timestampBeginFileRead();
         List<Tree> trees = parser.readTrees(inPath, city);
         fileWriter.timestampEndFileRead();
@@ -39,7 +43,6 @@ public class Query {
     }
 
     public Map<String, Neighbourhood> readNeighbourhoods() throws IOException {
-        CSVParser parser = new CSVParser();
         fileWriter.timestampBeginFileRead();
         Map<String, Neighbourhood> neighbourhoods = parser.readNeighbourhoods(inPath, city);
         fileWriter.timestampEndFileRead();
@@ -47,18 +50,18 @@ public class Query {
         return neighbourhoods;
     }
 
-    private void readArguments() throws InvalidArgumentException {
+    private void readArguments() throws InvalidArgumentException, IOException {
         addresses = System.getProperty("addresses");
         city = System.getProperty("city");
         inPath = System.getProperty("inPath");
         outPath = System.getProperty("outPath");
 
-        ArgumentValidator.validate(addresses, city, inPath, outPath);
+        ArgumentValidator.validate(addresses, city, inPath, outPath, parser.getAcceptableCities());
     }
 
     public void printFinishedQuery(final Integer n) {
-        System.out.println("Query " + n + " finished processing, you can find the results in " + outPath + "/query"
-                + n + ".csv");
+        System.out.println("\nQuery " + n + " finished processing, you can find the results in " + outPath + "/query" +
+                n + ".csv\n");
     }
 
     public void printEmptyQueryResult(final Integer n) {

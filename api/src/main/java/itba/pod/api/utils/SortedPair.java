@@ -1,7 +1,6 @@
 package itba.pod.api.utils;
 
 import java.io.Serializable;
-import java.util.Comparator;
 import java.util.Objects;
 
 public class SortedPair<T extends Comparable<T>> implements Comparable<SortedPair<T>>, Serializable {

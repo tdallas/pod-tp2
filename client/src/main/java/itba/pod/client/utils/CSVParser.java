@@ -14,41 +14,40 @@ import java.util.*;
 public class CSVParser {
 
     // Possible data types to process and query
-    private static final String TREES = "/arboles";
-    private static final String NEIGHBOURHOODS = "/barrios";
+    private static final String TREES = "arboles";
+    private static final String NEIGHBOURHOODS = "barrios";
 
     private static final String DELIMITER = ";";
 
-    private final GetPropertyValues properties;
+    private final CSVHeaderParser headerParser;
 
     public CSVParser() {
-         properties = new GetPropertyValues();
+         headerParser = new CSVHeaderParser();
+    }
+
+    public Set<String> getAcceptableCities() throws IOException {
+        return headerParser.getAcceptableCities();
     }
 
     public Map<String, Neighbourhood> readNeighbourhoods(String inPath, String city) throws IOException {
-        Map<String, String> fieldsMap = new HashMap<>();
-        fieldsMap.put(Neighbourhood.NAME, properties.getPropValue(Neighbourhood.NAME));
-        fieldsMap.put(Neighbourhood.POPULATION, properties.getPropValue(Neighbourhood.POPULATION));
-
+        Map<String, String> fieldsMap = headerParser.readNeighbourhoodHeaders(city);
         Map<String, Neighbourhood> result = new HashMap<>();
+
         for (CSVEntry entry : readNeighbourhoodsCSV(city, inPath, fieldsMap)) {
             Neighbourhood neighbourhood = (Neighbourhood) entry;
             result.put(neighbourhood.getName(), neighbourhood);
         }
+
         return result;
     }
 
     public List<Tree> readTrees(String inPath, String city) throws IOException {
-        Map<String, String> fieldsMap = new HashMap<>();
-        fieldsMap.put(Tree.NEIGHBOURHOOD, properties.getPropValue(city + '.' + Tree.NEIGHBOURHOOD));
-        fieldsMap.put(Tree.STREET, properties.getPropValue(city + '.' + Tree.STREET));
-        fieldsMap.put(Tree.SCIENTIFIC_NAME, properties.getPropValue(city + '.' + Tree.SCIENTIFIC_NAME));
-        fieldsMap.put(Tree.DIAMETER, properties.getPropValue(city + '.' + Tree.DIAMETER));
-
+        Map<String, String> fieldsMap = headerParser.readTreeHeaders(city);
         List<Tree> result = new LinkedList<>();
-        for (CSVEntry entry : readTreesCSV(city, inPath, fieldsMap)) {
+
+        for (CSVEntry entry : readTreesCSV(city, inPath, fieldsMap))
             result.add((Tree)entry);
-        }
+
         return result;
     }
 
@@ -64,7 +63,7 @@ public class CSVParser {
      */
     public List<CSVEntry> readTreesCSV(final String city, final String path, final Map<String, String> fieldsMap)
             throws IOException {
-        final String filePath = path + TREES + city + ".csv";
+        final String filePath = path + "/" + TREES + city + ".csv";
 
         return readCSV(TREES, filePath, fieldsMap);
     }
@@ -81,7 +80,7 @@ public class CSVParser {
      */
     public List<CSVEntry> readNeighbourhoodsCSV(final String city, final String path, final Map<String, String> fieldsMap)
             throws IOException {
-        final String filePath = path + NEIGHBOURHOODS + city + ".csv";
+        final String filePath = path + "/" + NEIGHBOURHOODS + city + ".csv";
 
         return readCSV(NEIGHBOURHOODS, filePath, fieldsMap);
     }
@@ -116,8 +115,6 @@ public class CSVParser {
 
         while ((line = br.readLine()) != null) {
             final String[] row = line.split(DELIMITER);
-
-            // TODO: Refactor this so that the if-else comparison inside the function isn't checked in every iteration
             Optional<CSVEntry> entry = buildEntry(row, indexes, dataName);
 
             entry.ifPresent(csvEntryList::add);

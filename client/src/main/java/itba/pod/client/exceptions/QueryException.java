@@ -16,8 +16,8 @@ public class QueryException extends Exception {
         if (specificException instanceof InvalidArgumentException) {
             System.out.println(specificException.getMessage());
         } else if (specificException instanceof IOException) {
-            LOGGER.error("Caught an error reading the CSV file\n");
-            specificException.printStackTrace();
+            LOGGER.error("Caught an error reading the CSV or configuration file\n");
+            System.out.println(specificException.getMessage());
         } else if (specificException instanceof InterruptedException ||
                 specificException instanceof ExecutionException) {
             LOGGER.error("Caught an error in the map/reduce process\n");

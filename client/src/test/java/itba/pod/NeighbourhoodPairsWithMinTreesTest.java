@@ -6,12 +6,13 @@ import itba.pod.client.queries.NeighbourhoodPairsWithMinTrees;
 import itba.pod.client.utils.HazelCast;
 import org.junit.Before;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+
+import static org.junit.Assert.assertArrayEquals;
 
 public class NeighbourhoodPairsWithMinTreesTest {
     private final NeighbourhoodPairsWithMinTrees query4 = new NeighbourhoodPairsWithMinTrees();

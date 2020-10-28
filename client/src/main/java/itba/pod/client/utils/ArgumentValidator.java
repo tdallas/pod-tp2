@@ -2,11 +2,13 @@ package itba.pod.client.utils;
 
 import itba.pod.client.exceptions.InvalidArgumentException;
 
+import java.util.Set;
+
 public class ArgumentValidator {
-    public static void validate(String addresses, String city, String inPath, String outPath)
+    public static void validate(String addresses, String city, String inPath, String outPath, Set<String> validCities)
             throws InvalidArgumentException {
         validateNotNull("-Daddresses", addresses);
-        validateCity(city);
+        validateCity(city, validCities);
         validateNotNull("-DinPath", inPath);
         validateNotNull("-DoutPath", outPath);
     }
@@ -29,12 +31,11 @@ public class ArgumentValidator {
             throw new InvalidArgumentException(argumentName + " argument is required");
     }
 
-    private static void validateCity(String city) throws InvalidArgumentException {
+    private static void validateCity(String city, final Set<String> validCities) throws InvalidArgumentException {
         validateNotNull("-Dcity", city);
 
-        // TODO: Refactor this so that it reads these hardcoded values from a configuration file
-        if (!city.equals("BUE") && !city.equals("VAN"))
-            throw new InvalidArgumentException("-Dcity should be BUE or VAN");
+        if (!validCities.contains(city))
+            throw new InvalidArgumentException("-Dcity should be one of the following: " + validCities.toString());
     }
 
     private static void validatePositiveInteger(String argumentName, String num) throws InvalidArgumentException {

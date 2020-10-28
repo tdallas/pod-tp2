@@ -4,8 +4,8 @@ import com.hazelcast.nio.ObjectDataInput;
 import com.hazelcast.nio.ObjectDataOutput;
 import com.hazelcast.nio.serialization.DataSerializable;
 
-
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 
 public class Neighbourhood implements CSVEntry, DataSerializable {
@@ -33,6 +33,10 @@ public class Neighbourhood implements CSVEntry, DataSerializable {
     @Override
     public String toString() {
         return String.join(", ", name, population.toString());
+    }
+
+    public static List<String> getStandardHeaders() {
+        return List.of(NAME, POPULATION);
     }
 
     @Override
